@@ -89,7 +89,7 @@ func TestShouldReturnPageSpecWithIndexAndNoSize(t *testing.T) {
 
 	// Then
 	assert.Nil(t, err)
-	assert.Equal(t, collection.PageSpec{ Idx: 1 }, result.Page)
+	assert.Equal(t, collection.PageSpec{Idx: 1}, result.Page)
 }
 
 func TestShouldReturnPageSpecWithIndexAndSize(t *testing.T) {
@@ -101,7 +101,7 @@ func TestShouldReturnPageSpecWithIndexAndSize(t *testing.T) {
 
 	// Then
 	assert.Nil(t, err)
-	assert.Equal(t, collection.PageSpec{ Idx: 2, Size: 100 }, result.Page)
+	assert.Equal(t, collection.PageSpec{Idx: 2, Size: 100}, result.Page)
 }
 
 func TestShouldReturnErrorOnZeroPageIndex(t *testing.T) {
