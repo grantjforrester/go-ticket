@@ -10,12 +10,17 @@ import (
 	"github.com/grantjforrester/go-ticket/pkg/authz"
 )
 
-type TicketRepository repository.Repository[model.TicketWithMetadata]
+
+var ticketQueries = map[string]collection.FieldCapability {
+	"summary": { Filter: true, Sort: true},
+}
 
 type TicketService struct {
 	authorizer authz.Authorizer
 	repository TicketRepository
 }
+
+type TicketRepository repository.Repository[model.TicketWithMetadata]
 
 func NewTicketService(r TicketRepository) TicketService {
 	return TicketService{repository: r}
@@ -26,20 +31,24 @@ func (as TicketService) QueryTickets(context context.Context, query collection.Q
 		return collection.Page[model.TicketWithMetadata]{}, err
 	}
 
+	if err := query.Validate(ticketQueries); err != nil {
+		return collection.Page[model.TicketWithMetadata]{}, err
+	}
+
 	tx, err := as.repository.StartTx(context, true)
 	if err != nil {
-		return collection.Page[model.TicketWithMetadata]{}, fmt.Errorf("alertservice: get alerts failed (1): %w", err)
+		return collection.Page[model.TicketWithMetadata]{}, fmt.Errorf("query tickets failed (1): %w", err)
 	}
 
 	alerts, err := as.repository.Query(tx, query)
 
 	if err != nil {
 		tx.Rollback()
-		return collection.Page[model.TicketWithMetadata]{}, fmt.Errorf("ticketservice: query tickets failed (2): %w", err)
+		return collection.Page[model.TicketWithMetadata]{}, fmt.Errorf("query tickets failed (2): %w", err)
 	}
 	err = tx.Commit()
 	if err != nil {
-		return collection.Page[model.TicketWithMetadata]{}, fmt.Errorf("ticketservice: query tickets failed (3): %w", err)
+		return collection.Page[model.TicketWithMetadata]{}, fmt.Errorf("query tickets failed (3): %w", err)
 	}
 
 	return alerts, nil
@@ -59,11 +68,11 @@ func (as TicketService) ReadTicket(context context.Context, alertId string) (mod
 
 	if err != nil {
 		tx.Rollback()
-		return model.TicketWithMetadata{}, fmt.Errorf("ticketservice: read ticket failed (2): %w", err)
+		return model.TicketWithMetadata{}, fmt.Errorf("read ticket failed (2): %w", err)
 	}
 	err = tx.Commit()
 	if err != nil {
-		return model.TicketWithMetadata{}, fmt.Errorf("ticketservice: read ticket failed (3): %w", err)
+		return model.TicketWithMetadata{}, fmt.Errorf("read ticket failed (3): %w", err)
 	}
 
 	return ticket, nil
@@ -80,18 +89,18 @@ func (as TicketService) CreateTicket(context context.Context, ticket model.Ticke
 
 	tx, err := as.repository.StartTx(context, false)
 	if err != nil {
-		return model.TicketWithMetadata{}, fmt.Errorf("ticketservice: create ticket failed (1): %w", err)
+		return model.TicketWithMetadata{}, fmt.Errorf("create ticket failed (1): %w", err)
 	}
 
 	newTicket, err := as.repository.Create(tx, ticket)
 
 	if err != nil {
 		tx.Rollback()
-		return model.TicketWithMetadata{}, fmt.Errorf("ticketservice: create ticket failed (2): %w", err)
+		return model.TicketWithMetadata{}, fmt.Errorf("create ticket failed (2): %w", err)
 	}
 	err = tx.Commit()
 	if err != nil {
-		return model.TicketWithMetadata{}, fmt.Errorf("ticketservice: create ticket failed (3): %w", err)
+		return model.TicketWithMetadata{}, fmt.Errorf("create ticket failed (3): %w", err)
 	}
 
 	return newTicket, nil
@@ -108,18 +117,18 @@ func (as TicketService) UpdateTicket(context context.Context, ticket model.Ticke
 
 	tx, err := as.repository.StartTx(context, false)
 	if err != nil {
-		return model.TicketWithMetadata{}, fmt.Errorf("ticketservice: update ticket failed (1): %w", err)
+		return model.TicketWithMetadata{}, fmt.Errorf("update ticket failed (1): %w", err)
 	}
 
 	updatedTicket, err := as.repository.Update(tx, ticket)
 
 	if err != nil {
 		tx.Rollback()
-		return model.TicketWithMetadata{}, fmt.Errorf("ticketservice: update ticket failed (2): %w", err)
+		return model.TicketWithMetadata{}, fmt.Errorf("update ticket failed (2): %w", err)
 	}
 	err = tx.Commit()
 	if err != nil {
-		return model.TicketWithMetadata{}, fmt.Errorf("ticketservice: update ticket failed (3): %w", err)
+		return model.TicketWithMetadata{}, fmt.Errorf("update ticket failed (3): %w", err)
 	}
 
 	return updatedTicket, nil
@@ -132,18 +141,18 @@ func (as TicketService) DeleteAlert(context context.Context, alertId string) err
 
 	tx, err := as.repository.StartTx(context, false)
 	if err != nil {
-		return fmt.Errorf("ticketservice: delete ticket failed (1): %w", err)
+		return fmt.Errorf("delete ticket failed (1): %w", err)
 	}
 
 	err = as.repository.Delete(tx, alertId)
 
 	if err != nil {
 		tx.Rollback()
-		return fmt.Errorf("ticketservice: delete ticket failed (2): %w", err)
+		return fmt.Errorf("delete ticket failed (2): %w", err)
 	}
 	err = tx.Commit()
 	if err != nil {
-		return fmt.Errorf("ticketservice: delete ticket failed (3): %w", err)
+		return fmt.Errorf("delete ticket failed (3): %w", err)
 	}
 
 	return nil
