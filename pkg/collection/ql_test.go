@@ -1,4 +1,4 @@
-package rql_test
+package collection_test
 
 import (
 	"net/url"
@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/grantjforrester/go-ticket/pkg/collection"
-	"github.com/grantjforrester/go-ticket/pkg/rql"
 )
 
 func TestShouldReturnEmpty(t *testing.T) {
@@ -15,7 +14,7 @@ func TestShouldReturnEmpty(t *testing.T) {
 	query := MustParseQuery("")
 
 	// When
-	result, err := rql.Parse(query)
+	result, err := collection.ParseQuery(query)
 
 	// Then
 	assert.Nil(t, err)
@@ -30,7 +29,7 @@ func TestShouldReturnFilter(t *testing.T) {
 	query := MustParseQuery("filter=foo%3D%3Dbar")
 
 	// When
-	result, err := rql.Parse(query)
+	result, err := collection.ParseQuery(query)
 
 	// Then
 	assert.Nil(t, err)
@@ -45,7 +44,7 @@ func TestShouldReturnErrorOnInvalidFilter(t *testing.T) {
 	query := MustParseQuery("filter=foo")
 
 	// When
-	_, err := rql.Parse(query)
+	_, err := collection.ParseQuery(query)
 
 	// Then
 	assert.NotNil(t, err)
@@ -58,7 +57,7 @@ func TestShouldReturnSort(t *testing.T) {
 	query := MustParseQuery("sort=foo+asc")
 
 	// When
-	result, err := rql.Parse(query)
+	result, err := collection.ParseQuery(query)
 
 	// Then
 	assert.Nil(t, err)
@@ -72,7 +71,7 @@ func TestShouldReturnErrorInInvalidSort(t *testing.T) {
 	query := MustParseQuery("sort=foo")
 
 	// When
-	_, err := rql.Parse(query)
+	_, err := collection.ParseQuery(query)
 
 	// Then
 	assert.NotNil(t, err)
@@ -85,7 +84,7 @@ func TestShouldReturnPageSpecWithIndexAndNoSize(t *testing.T) {
 	query := MustParseQuery("page=1")
 
 	// When
-	result, err := rql.Parse(query)
+	result, err := collection.ParseQuery(query)
 
 	// Then
 	assert.Nil(t, err)
@@ -98,7 +97,7 @@ func TestShouldReturnPageSpecWithIndexAndSize(t *testing.T) {
 	query := MustParseQuery("page=2&size=100")
 
 	// When
-	result, err := rql.Parse(query)
+	result, err := collection.ParseQuery(query)
 
 	// Then
 	assert.Nil(t, err)
@@ -111,7 +110,7 @@ func TestShouldReturnErrorOnZeroPageIndex(t *testing.T) {
 	query := MustParseQuery("page=0")
 
 	// When
-	_, err := rql.Parse(query)
+	_, err := collection.ParseQuery(query)
 
 	// Then
 	assert.NotNil(t, err)
@@ -124,7 +123,7 @@ func TestShouldReturnErrorOnInvalidPageIndex(t *testing.T) {
 	query := MustParseQuery("page=foo")
 
 	// When
-	_, err := rql.Parse(query)
+	_, err := collection.ParseQuery(query)
 
 	// Then
 	assert.NotNil(t, err)
@@ -137,7 +136,7 @@ func TestShouldReturnErrorOnZeroPageSize(t *testing.T) {
 	query := MustParseQuery("page=1&size=0")
 
 	// When
-	_, err := rql.Parse(query)
+	_, err := collection.ParseQuery(query)
 
 	// Then
 	assert.NotNil(t, err)
@@ -150,7 +149,7 @@ func TestShouldReturnErrorOnInvalidPageSize(t *testing.T) {
 	query := MustParseQuery("page=1&size=foo")
 
 	// When
-	_, err := rql.Parse(query)
+	_, err := collection.ParseQuery(query)
 
 	// Then
 	assert.NotNil(t, err)

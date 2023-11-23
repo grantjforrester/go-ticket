@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"path"
 
-	"github.com/grantjforrester/go-ticket/pkg/rql"
+	"github.com/grantjforrester/go-ticket/pkg/collection"
 	"github.com/grantjforrester/go-ticket/app/model"
 )
 
@@ -21,7 +21,7 @@ func (a *Api) registerTickets() {
 
 func (a *Api) queryTickets(w http.ResponseWriter, r *http.Request) {
 	rqlQuery, _ := url.ParseQuery(r.URL.RawQuery)
-	query, err := rql.Parse(rqlQuery)
+	query, err := collection.ParseQuery(rqlQuery)
 	if err != nil {
 		a.mediaHandler.WriteError(w, err)
 		return
