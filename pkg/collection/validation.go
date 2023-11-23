@@ -19,10 +19,6 @@ func (q Query) Validate(fieldCapabilities map[string]FieldCapability) error {
 			return fmt.Errorf("invalid sort: %s", field.Field)
 		}
 	}
-
-	if q.Page.Idx == 0 {
-		return fmt.Errorf("invalid page size: %d", q.Page.Idx)
-	}
 	
 	return nil
 }
