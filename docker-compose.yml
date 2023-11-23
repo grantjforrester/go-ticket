@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:16
+    ports:
+      - 127.0.0.1:${DB_PORT}:${DB_PORT}
+    environment:
+      POSTGRES_USERNAME: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./db/migrations:/docker-entrypoint-initdb.d
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:8
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - 127.0.0.1:8900:80
+    volumes:
+      - ./etc/servers.json:/pgadmin4/servers.json
+
+  app:
+    container_name: app
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - 127.0.0.1:8080:8080
+    environment:
+      DB_HOST: postgres
+      DB_PORT: ${DB_PORT}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_DATABASE}
+    profiles:
+      - include_app
