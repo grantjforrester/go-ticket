@@ -22,8 +22,8 @@ type TicketService struct {
 
 type TicketRepository repository.Repository[model.TicketWithMetadata]
 
-func NewTicketService(r TicketRepository) TicketService {
-	return TicketService{repository: r}
+func NewTicketService(r TicketRepository, a authz.Authorizer) TicketService {
+	return TicketService{repository: r, authorizer: a}
 }
 
 func (as TicketService) QueryTickets(context context.Context, query collection.Query) (collection.Page[model.TicketWithMetadata], error) {

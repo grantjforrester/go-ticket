@@ -6,6 +6,7 @@ import (
 	"github.com/grantjforrester/go-ticket/app/adapter/api"
 	"github.com/grantjforrester/go-ticket/app/adapter/repository"
 	"github.com/grantjforrester/go-ticket/app/service"
+	"github.com/grantjforrester/go-ticket/pkg/authz"
 	"github.com/grantjforrester/go-ticket/pkg/config"
 	"github.com/grantjforrester/go-ticket/pkg/media"
 )
@@ -21,7 +22,8 @@ func NewApp(config config.Provider) App {
 	repository := repository.NewSqlTicketRepository(connectionPool)
 
 	// services
-	service := service.NewTicketService(repository)
+	authorizer := authz.AlwaysAuthorize{}
+	service := service.NewTicketService(repository, authorizer)
 	
 	// primary adapters
 	mediaHandler := media.JsonHandler{ ErrorMap: api.NewErrorMapper() }
