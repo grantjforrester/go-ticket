@@ -7,7 +7,8 @@ import (
 type Query struct {
 	Filters []FilterSpec
 	Sorts	[]SortSpec
-	Page	PageSpec
+	Page	uint64
+	Size	uint64
 }
 
 type FieldCapability struct {

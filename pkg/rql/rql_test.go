@@ -21,8 +21,8 @@ func TestShouldReturnEmpty(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Len(t, result.Filters, 0)
 	assert.Len(t, result.Sorts, 0)
-	assert.Equal(t, result.Page.Idx, uint64(0))
-	assert.Equal(t, result.Page.Size, uint64(0))
+	assert.Equal(t, result.Page, uint64(1))
+	assert.Equal(t, result.Size, uint64(100))
 }
 
 func TestShouldReturnFilter(t *testing.T) {
@@ -89,7 +89,8 @@ func TestShouldReturnPageSpecWithIndexAndNoSize(t *testing.T) {
 
 	// Then
 	assert.Nil(t, err)
-	assert.Equal(t, collection.PageSpec{Idx: 1}, result.Page)
+	assert.Equal(t, uint64(1), result.Page)
+	assert.Equal(t, uint64(100), result.Size)
 }
 
 func TestShouldReturnPageSpecWithIndexAndSize(t *testing.T) {
@@ -101,7 +102,8 @@ func TestShouldReturnPageSpecWithIndexAndSize(t *testing.T) {
 
 	// Then
 	assert.Nil(t, err)
-	assert.Equal(t, collection.PageSpec{Idx: 2, Size: 100}, result.Page)
+	assert.Equal(t, uint64(2), result.Page)
+	assert.Equal(t, uint64(100), result.Size)
 }
 
 func TestShouldReturnErrorOnZeroPageIndex(t *testing.T) {
@@ -113,7 +115,7 @@ func TestShouldReturnErrorOnZeroPageIndex(t *testing.T) {
 
 	// Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "page index")
+	assert.Contains(t, err.Error(), "page")
 	assert.Contains(t, err.Error(), "0")
 }
 
@@ -126,7 +128,7 @@ func TestShouldReturnErrorOnInvalidPageIndex(t *testing.T) {
 
 	// Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "page index")
+	assert.Contains(t, err.Error(), "page")
 	assert.Contains(t, err.Error(), "foo")
 }
 
@@ -139,7 +141,7 @@ func TestShouldReturnErrorOnZeroPageSize(t *testing.T) {
 
 	// Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "page size")
+	assert.Contains(t, err.Error(), "size")
 	assert.Contains(t, err.Error(), "0")
 }
 
@@ -152,7 +154,7 @@ func TestShouldReturnErrorOnInvalidPageSize(t *testing.T) {
 
 	// Then
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "page size")
+	assert.Contains(t, err.Error(), "size")
 	assert.Contains(t, err.Error(), "foo")
 }
 

@@ -12,7 +12,7 @@ import (
 
 
 var ticketQueries = map[string]collection.FieldCapability {
-	"Summary": { Filter: true, Sort: true},
+	"summary": { Filter: true, Sort: true},
 }
 
 type TicketService struct {

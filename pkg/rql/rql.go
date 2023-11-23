@@ -23,6 +23,9 @@ const (
 	LT_SEQ   = "<"
 	GE_SEQ   = ">="
 	LE_SEQ   = "<="
+
+	DEFAULT_PAGE = uint64(1)
+	DEFAULT_SIZE = uint64(100)
 )
 
 var DIRECTIONS = map[string]collection.Direction{
@@ -46,87 +49,81 @@ var FILTER_PATTERN = fmt.Sprintf("(%s)(%s)(%s)", FIELD_PATTERN, OPERATOR_PATTERN
 var SORT_PATTERN = fmt.Sprintf("(%s) (%s|%s)", FIELD_PATTERN, ASC_SEQ, DESC_SEQ)
 
 func Parse(urlQuery url.Values) (collection.Query, error) {
-	var sort_re = regexp.MustCompile(SORT_PATTERN)
-	var filter_re = regexp.MustCompile(FILTER_PATTERN)
+	var frx = regexp.MustCompile(FILTER_PATTERN)
+	var srx = regexp.MustCompile(SORT_PATTERN)
 
-	query := collection.Query{}
+	q := collection.Query{}
 
-	filterSpecs, err := parseFilters(urlQuery[FILTER], *filter_re)
+	fs, err := parseFilters(urlQuery[FILTER], *frx)
 	if err != nil {
 		return collection.Query{}, fmt.Errorf("invalid query: %w", err)
 	}
-	query.Filters = filterSpecs
+	q.Filters = fs
 
-	sortSpecs, err := parseSorts(urlQuery[SORT], *sort_re)
+	ss, err := parseSorts(urlQuery[SORT], *srx)
 	if err != nil {
 		return collection.Query{}, fmt.Errorf("invalid query: %w", err)
 	}
-	query.Sorts = sortSpecs
+	q.Sorts = ss
 
-	pageSpec, err := parsePage(urlQuery.Get(PAGE), urlQuery.Get(SIZE))
+	pg, sz, err := parsePage(urlQuery.Get(PAGE), urlQuery.Get(SIZE))
 	if err != nil {
 		return collection.Query{}, fmt.Errorf("invalid query: %w", err)
 	}
-	query.Page = pageSpec
+	q.Page = pg
+	q.Size = sz
 
-	return query, nil
+	return q, nil
 }
 
-func parseFilters(clauses []string, regexp regexp.Regexp) ([]collection.FilterSpec, error) {
-	if len(clauses) == 0 {
-		return []collection.FilterSpec{}, nil
-	}
+func parseFilters(filters []string, regex regexp.Regexp) ([]collection.FilterSpec, error) {
+	fltrs := []collection.FilterSpec{}
 
-	filters := []collection.FilterSpec{}
-	for _, filter := range clauses {
-		if regexp.MatchString(filter) {
-			parts := regexp.FindStringSubmatch(filter)
-			field := parts[1]
-			operator := parts[2]
-			value := parts[3]
-			filters = append(filters, collection.FilterSpec{Field: field, Operator: OPERATORS[operator], Value: value})
+	for _, f := range filters {
+		if regex.MatchString(f) {
+			parts := regex.FindStringSubmatch(f)
+			fltrs = append(fltrs, collection.FilterSpec{Field: parts[1], Operator: OPERATORS[parts[2]], Value: parts[3]})
 		} else {
-			return nil, fmt.Errorf("invalid filter: %s", filter)
+			return nil, fmt.Errorf("invalid filter: %s", f)
 		}
 	}
-	return filters, nil
+
+	return fltrs, nil
 }
 
 func parseSorts(clauses []string, regexp regexp.Regexp) ([]collection.SortSpec, error) {
-	if len(clauses) == 0 {
-		return []collection.SortSpec{}, nil
-	}
+	srts := []collection.SortSpec{}
 
-	sorts := []collection.SortSpec{}
-	for _, sort := range clauses {
-		if regexp.MatchString(sort) {
-			parts := regexp.FindStringSubmatch(sort)
-			field := parts[1]
-			direction := parts[2]
-			sorts = append(sorts, collection.SortSpec{Field: field, Direction: DIRECTIONS[direction]})
+	for _, s := range clauses {
+		if regexp.MatchString(s) {
+			parts := regexp.FindStringSubmatch(s)
+			srts = append(srts, collection.SortSpec{Field: parts[1], Direction: DIRECTIONS[parts[2]]})
 		} else {
-			return nil, fmt.Errorf("invalid sort: %s", sort)
+			return nil, fmt.Errorf("invalid sort: %s", s)
 		}
 	}
-	return sorts, nil
+
+	return srts, nil
 }
 
-func parsePage(pageIdx string, pageSize string) (collection.PageSpec, error) {
-	if pageIdx == "" {
-		return collection.PageSpec{}, nil
-	}
+func parsePage(page string, size string) (uint64, uint64, error) {
+	var pg = DEFAULT_PAGE
+	var err error
 
-	idx, err := strconv.ParseUint(pageIdx, 10, 64)
-	if err != nil || idx == 0 {
-		return collection.PageSpec{}, fmt.Errorf("invalid page index: %s", pageIdx)
-	}
-
-	var size uint64
-	if pageSize != "" {
-		size, err = strconv.ParseUint(pageSize, 10, 64)
-		if err != nil || size == 0 {
-			return collection.PageSpec{}, fmt.Errorf("invalid page size: %s", pageSize)
+	if page != "" {
+		pg, err = strconv.ParseUint(page, 10, 64)
+		if err != nil || pg == 0 {
+			return 0, 0, fmt.Errorf("invalid page: %s", page)
 		}
 	}
-	return collection.PageSpec{Idx: idx, Size: size}, nil
+
+	var sz = DEFAULT_SIZE
+	if size != "" {
+		sz, err = strconv.ParseUint(size, 10, 64)
+		if err != nil || sz == 0 {
+			return 0, 0, fmt.Errorf("invalid size: %s", size)
+		}
+	}
+
+	return pg, sz, nil
 }

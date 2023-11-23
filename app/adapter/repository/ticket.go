@@ -110,8 +110,15 @@ func (s SqlTicketRepository) Query(tx repository.Tx, query collection.Query) (co
 		results = append(results, ticket)
 	}
 
+	sz := uint64(len(results))
+	pg := uint64(0)
+	if sz > 0 {
+		pg = query.Page
+	}
 	return collection.Page[model.TicketWithMetadata]{
 		Results: results,
+		Page: pg,
+		Size: sz,
 	}, nil
 }
 

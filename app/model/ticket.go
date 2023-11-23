@@ -6,8 +6,9 @@ import (
 )
 
 type Ticket struct {
-	Summary string
-	Description string
+	Summary string		`json:"summary"`
+	Description string	`json:"description"`
+
 }
 
 func(a Ticket) Validate() error {
