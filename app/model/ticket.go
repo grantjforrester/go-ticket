@@ -6,18 +6,18 @@ import (
 )
 
 type Ticket struct {
-	Summary string		`json:"summary" query:"filter,sort"`
-	Description string	`json:"description" query:"-"`
+	Summary string
+	Description string
 }
 
 func(a Ticket) Validate() error {
 	errs := []string{}
 	
 	if a.Summary == "" {
-		errs = append(errs, "invalid alert: missing field: summary")
+		errs = append(errs, "invalid ticket: missing field: summary")
 	}
 	if a.Description == "" {
-		errs = append(errs, "invalid alert: missing field: description")
+		errs = append(errs, "invalid ticket: missing field: description")
 	}
 	
 	if len(errs) > 0 {
