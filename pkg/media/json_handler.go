@@ -22,8 +22,8 @@ func (j JsonHandler) ReadResource(r *http.Request, v any) error {
 
 func (j JsonHandler) WriteResponse(w http.ResponseWriter, statusCode int, resource any) {
 	w.Header().Set("Content-Type", "application/json")
-    w.WriteHeader(statusCode)
-	if (resource != nil) {
+	w.WriteHeader(statusCode)
+	if resource != nil {
 		json.NewEncoder(w).Encode(resource)
 	}
 }

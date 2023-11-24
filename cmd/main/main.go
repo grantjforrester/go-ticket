@@ -17,18 +17,18 @@ func main() {
 	app := app.NewApp(config)
 	app.Start()
 
-    sig := make(chan os.Signal, 1)
-    done := make(chan bool, 1)
+	sig := make(chan os.Signal, 1)
+	done := make(chan bool, 1)
 
-    signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
-    go func() {
-        sig := <-sig
-        log.Printf("Received signal: %s", sig)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		sig := <-sig
+		log.Printf("Received signal: %s", sig)
 		app.Stop()
-        done <- true
-    }()
+		done <- true
+	}()
 
-    log.Println("Started")
-    <-done
-    log.Println("Exiting...")
+	log.Println("Started")
+	<-done
+	log.Println("Exiting...")
 }

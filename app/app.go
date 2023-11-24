@@ -24,11 +24,11 @@ func NewApp(config config.Provider) App {
 	// services
 	authorizer := authz.AlwaysAuthorize{}
 	service := service.NewTicketService(repository, authorizer)
-	
+
 	// primary adapters
-	mediaHandler := media.JsonHandler{ ErrorMap: api.NewErrorMapper() }
-	
+	mediaHandler := media.JsonHandler{ErrorMap: api.NewErrorMapper()}
+
 	api := api.NewApi(config, service, mediaHandler)
-	
+
 	return api
 }

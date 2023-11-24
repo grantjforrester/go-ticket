@@ -1,3 +1,3 @@
 package repository
 
-type Query interface {}
+type Query interface{}

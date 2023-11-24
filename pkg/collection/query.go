@@ -6,15 +6,15 @@ import (
 
 type Query struct {
 	Filters []FilterSpec
-	Sorts	[]SortSpec
-	Page	uint64
-	Size	uint64
+	Sorts   []SortSpec
+	Page    uint64
+	Size    uint64
 }
 
 type FilterSpec struct {
-	Field		string
-	Operator	Operator
-	Value		any
+	Field    string
+	Operator Operator
+	Value    any
 }
 
 type Operator string
@@ -27,14 +27,14 @@ type SortSpec struct {
 type Direction string
 
 type Page[T any] struct {
-	Results		[]T		`json:"results"`
-	Page 		uint64	`json:"page"`
-	Size		uint64	`json:"size"`
+	Results []T    `json:"results"`
+	Page    uint64 `json:"page"`
+	Size    uint64 `json:"size"`
 }
 
 type FieldCapability struct {
-	Filter  bool
-	Sort	bool
+	Filter bool
+	Sort   bool
 }
 
 func (q Query) Validate(fieldCapabilities map[string]FieldCapability) error {
@@ -49,6 +49,6 @@ func (q Query) Validate(fieldCapabilities map[string]FieldCapability) error {
 			return fmt.Errorf("invalid sort: %s", field.Field)
 		}
 	}
-	
+
 	return nil
 }

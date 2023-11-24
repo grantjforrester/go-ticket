@@ -10,7 +10,6 @@ import (
 )
 
 type MockError1 struct {
-
 }
 
 func (r *MockError1) Error() string {
@@ -18,7 +17,6 @@ func (r *MockError1) Error() string {
 }
 
 type MockError2 struct {
-
 }
 
 func (r *MockError2) Error() string {
@@ -39,9 +37,9 @@ func TestShouldReturnDefaultError(t *testing.T) {
 	assert.NotNil(t, errorResponse)
 	assert.Equal(t, em.Rfc7807Error{
 		TypeUri: "test:err:internalservererror",
-		Title: "Internal Server Error",
-		Status: 500,
-		Detail: "mock error 1",
+		Title:   "Internal Server Error",
+		Status:  500,
+		Detail:  "mock error 1",
 	}, errorResponse.(em.Rfc7807Error))
 }
 
@@ -61,9 +59,9 @@ func TestShouldMatchErrorAndReturnRfc7807Error(t *testing.T) {
 	assert.NotNil(t, errorResponse)
 	assert.Equal(t, em.Rfc7807Error{
 		TypeUri: "test:err:notfound",
-		Title: "Not Found",
-		Status: 404,
-		Detail: "mock error 1",
+		Title:   "Not Found",
+		Status:  404,
+		Detail:  "mock error 1",
 	}, errorResponse.(em.Rfc7807Error))
 }
 
@@ -82,9 +80,9 @@ func TestShouldReturnDefaultErrorIfNoMatch(t *testing.T) {
 	assert.NotNil(t, errorResponse)
 	assert.Equal(t, em.Rfc7807Error{
 		TypeUri: "test:err:internalservererror",
-		Title: "Internal Server Error",
-		Status: 500,
-		Detail: "mock error 2",
+		Title:   "Internal Server Error",
+		Status:  500,
+		Detail:  "mock error 2",
 	}, errorResponse.(em.Rfc7807Error))
 }
 
@@ -103,8 +101,8 @@ func TestShouldMatchWrappedError(t *testing.T) {
 	assert.NotNil(t, errorResponse)
 	assert.Equal(t, em.Rfc7807Error{
 		TypeUri: "test:err:notfound",
-		Title: "Not Found",
-		Status: 404,
-		Detail: "wrapper: mock error 1",
+		Title:   "Not Found",
+		Status:  404,
+		Detail:  "wrapper: mock error 1",
 	}, errorResponse.(em.Rfc7807Error))
 }

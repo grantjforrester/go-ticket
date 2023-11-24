@@ -12,8 +12,8 @@ import (
 )
 
 type validStruct struct {
-	Foo string	`json:"foo"`
-	Bar int		`json:"bar"`
+	Foo string `json:"foo"`
+	Bar int    `json:"bar"`
 }
 
 func TestShouldUnmarshallValidResource(t *testing.T) {

@@ -1,8 +1,10 @@
 package repository
 
-import "context"
+import (
+	"context"
 
-import "github.com/grantjforrester/go-ticket/pkg/collection"
+	"github.com/grantjforrester/go-ticket/pkg/collection"
+)
 
 type Repository[T any] interface {
 	Create(Tx, T) (T, error)

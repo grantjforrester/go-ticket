@@ -5,14 +5,13 @@ import (
 	"fmt"
 
 	"github.com/grantjforrester/go-ticket/app/model"
-	"github.com/grantjforrester/go-ticket/pkg/repository"
-	"github.com/grantjforrester/go-ticket/pkg/collection"
 	"github.com/grantjforrester/go-ticket/pkg/authz"
+	"github.com/grantjforrester/go-ticket/pkg/collection"
+	"github.com/grantjforrester/go-ticket/pkg/repository"
 )
 
-
-var ticketQueries = map[string]collection.FieldCapability {
-	"summary": { Filter: true, Sort: true},
+var ticketQueries = map[string]collection.FieldCapability{
+	"summary": {Filter: true, Sort: true},
 }
 
 type TicketService struct {
@@ -58,7 +57,7 @@ func (as TicketService) ReadTicket(context context.Context, alertId string) (mod
 	if err := as.authorizer.IsAuthorized(context, "ReadTicket"); err != nil {
 		return model.TicketWithMetadata{}, err
 	}
-	
+
 	tx, err := as.repository.StartTx(context, true)
 	if err != nil {
 		return model.TicketWithMetadata{}, fmt.Errorf("ticketservice: read ticket failed (1): %w", err)
@@ -82,7 +81,7 @@ func (as TicketService) CreateTicket(context context.Context, ticket model.Ticke
 	if err := as.authorizer.IsAuthorized(context, "CreateTicket"); err != nil {
 		return model.TicketWithMetadata{}, err
 	}
-	
+
 	if err := ticket.Validate(); err != nil {
 		return model.TicketWithMetadata{}, &RequestError{Message: err.Error()}
 	}
@@ -110,7 +109,7 @@ func (as TicketService) UpdateTicket(context context.Context, ticket model.Ticke
 	if err := as.authorizer.IsAuthorized(context, "UpdateTicket"); err != nil {
 		return model.TicketWithMetadata{}, err
 	}
-	
+
 	if err := ticket.Validate(); err != nil {
 		return model.TicketWithMetadata{}, &RequestError{Message: err.Error()}
 	}

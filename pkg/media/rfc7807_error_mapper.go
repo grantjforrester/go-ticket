@@ -9,32 +9,32 @@ import (
 
 type Rfc7807ErrorMapping struct {
 	Status int
-	Title string
+	Title  string
 }
 
 type Rfc7807Error struct {
-	TypeUri string	`json:"type"`
-	Title string	`json:"title"`
-	Status int		`json:"status"`
-	Detail string	`json:"detail"`
+	TypeUri string `json:"type"`
+	Title   string `json:"title"`
+	Status  int    `json:"status"`
+	Detail  string `json:"detail"`
 }
 
 type Rfc7807ErrorMapper struct {
-	uriPrefix string
+	uriPrefix    string
 	defaultError Rfc7807ErrorMapping
-	errorMap map[string]Rfc7807ErrorMapping
+	errorMap     map[string]Rfc7807ErrorMapping
 }
 
-func NewRfc7807ErrorMapper(uriPrefix string, defaultError Rfc7807ErrorMapping) Rfc7807ErrorMapper{
+func NewRfc7807ErrorMapper(uriPrefix string, defaultError Rfc7807ErrorMapping) Rfc7807ErrorMapper {
 	errorMap := make(map[string]Rfc7807ErrorMapping)
 	return Rfc7807ErrorMapper{
-		uriPrefix: uriPrefix, 
+		uriPrefix:    uriPrefix,
 		defaultError: defaultError,
-		errorMap: errorMap,
+		errorMap:     errorMap,
 	}
 }
 
-func(e *Rfc7807ErrorMapper) MapError(err error) (int, any) {
+func (e *Rfc7807ErrorMapper) MapError(err error) (int, any) {
 	if errorMapping, ok := e.matchError(err); ok {
 		// return specific error
 		return errorMapping.Status, e.mapError(err, errorMapping)
@@ -45,13 +45,13 @@ func(e *Rfc7807ErrorMapper) MapError(err error) (int, any) {
 	}
 }
 
-func(e *Rfc7807ErrorMapper) RegisterError(err error, mapping Rfc7807ErrorMapping) {
+func (e *Rfc7807ErrorMapper) RegisterError(err error, mapping Rfc7807ErrorMapping) {
 	errorType := reflect.TypeOf(err).Elem().Name()
 
 	e.errorMap[errorType] = mapping
 }
 
-func(e *Rfc7807ErrorMapper) matchError(err error) (Rfc7807ErrorMapping, bool) {
+func (e *Rfc7807ErrorMapper) matchError(err error) (Rfc7807ErrorMapping, bool) {
 	for e1 := err; e1 != nil; {
 		errorType := reflect.TypeOf(e1).Elem().Name()
 		errorMapping, ok := e.errorMap[errorType]
@@ -63,15 +63,15 @@ func(e *Rfc7807ErrorMapper) matchError(err error) (Rfc7807ErrorMapping, bool) {
 	return Rfc7807ErrorMapping{}, false
 }
 
-func(e *Rfc7807ErrorMapper) mapError(err error, mapping Rfc7807ErrorMapping) Rfc7807Error {
+func (e *Rfc7807ErrorMapper) mapError(err error, mapping Rfc7807ErrorMapping) Rfc7807Error {
 	return Rfc7807Error{
 		TypeUri: e.formatUri(mapping.Title),
-		Title: mapping.Title, 
-		Status: mapping.Status, 
-		Detail: err.Error(),
+		Title:   mapping.Title,
+		Status:  mapping.Status,
+		Detail:  err.Error(),
 	}
 }
 
-func(e *Rfc7807ErrorMapper) formatUri(title string) string {
-	return strings.ReplaceAll(strings.ToLower(e.uriPrefix + title), " ", "") 
+func (e *Rfc7807ErrorMapper) formatUri(title string) string {
+	return strings.ReplaceAll(strings.ToLower(e.uriPrefix+title), " ", "")
 }

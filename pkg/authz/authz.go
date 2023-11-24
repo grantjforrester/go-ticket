@@ -9,7 +9,6 @@ type Authorizer interface {
 }
 
 type AlwaysAuthorize struct {
-
 }
 
 var _ Authorizer = (*AlwaysAuthorize)(nil)

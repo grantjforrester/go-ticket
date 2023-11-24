@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/grantjforrester/go-ticket/pkg/repository"
-	"github.com/grantjforrester/go-ticket/pkg/collection"
 	"github.com/grantjforrester/go-ticket/app/model"
 	"github.com/grantjforrester/go-ticket/app/service"
+	"github.com/grantjforrester/go-ticket/pkg/collection"
+	"github.com/grantjforrester/go-ticket/pkg/repository"
 )
 
 type SqlTicketRepository struct {
@@ -62,8 +62,8 @@ func (s SqlTicketRepository) Update(tx repository.Tx, ticket model.TicketWithMet
 	res, err := ptx.Exec(`UPDATE tickets
 							SET summary = $3, description = $4
 							WHERE id = $1
-							AND version = $2`, 
-					ticket.Id, ticket.Version, ticket.Summary, ticket.Description)
+							AND version = $2`,
+		ticket.Id, ticket.Version, ticket.Summary, ticket.Description)
 	if err != nil {
 		return model.TicketWithMetadata{}, fmt.Errorf("update ticket failed (2): %w", err)
 	}
@@ -95,8 +95,8 @@ func (s SqlTicketRepository) Query(tx repository.Tx, query collection.Query) (co
 
 	rows, err := ptx.Query(`SELECT id, version, summary, description FROM tickets`)
 	if err != nil {
-		return collection.Page[model.TicketWithMetadata]{}, 
-		fmt.Errorf("query tickets failed (1): %w", err)
+		return collection.Page[model.TicketWithMetadata]{},
+			fmt.Errorf("query tickets failed (1): %w", err)
 	}
 	defer rows.Close()
 
@@ -104,8 +104,8 @@ func (s SqlTicketRepository) Query(tx repository.Tx, query collection.Query) (co
 		ticket := model.TicketWithMetadata{}
 		err := rows.Scan(&ticket.Id, &ticket.Version, &ticket.Summary, &ticket.Description)
 		if err != nil {
-			return collection.Page[model.TicketWithMetadata]{}, 
-			fmt.Errorf("query tickets failed (2): %w", err)
+			return collection.Page[model.TicketWithMetadata]{},
+				fmt.Errorf("query tickets failed (2): %w", err)
 		}
 		results = append(results, ticket)
 	}
@@ -117,8 +117,8 @@ func (s SqlTicketRepository) Query(tx repository.Tx, query collection.Query) (co
 	}
 	return collection.Page[model.TicketWithMetadata]{
 		Results: results,
-		Page: pg,
-		Size: sz,
+		Page:    pg,
+		Size:    sz,
 	}, nil
 }
 
