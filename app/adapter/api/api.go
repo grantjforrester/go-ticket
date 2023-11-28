@@ -26,14 +26,18 @@ type Api struct {
 
 func NewApi(config config.Provider, svc service.TicketService, mh media.Handler) Api {
 	p := config.GetInt("api_port")
+
 	r := mux.NewRouter()
+	ar := r.PathPrefix("/api/v1").Subrouter()
 	srv := &http.Server{Addr: fmt.Sprintf(":%d", p), Handler: r}
-	api := Api{port: p, server: srv, router: r, service: svc, mediaHandler: mh}
+	api := Api{port: p, server: srv, router: ar, service: svc, mediaHandler: mh}
 
-	api.registerTickets()
+	// register standard endpoints
+	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) })
+	// register application endpoints
+	api.registerTicketsApi()
 
-	r.HandleFunc("foo", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) })
-
+	// default not found
 	r.NotFoundHandler = http.HandlerFunc(api.PathNotFound)
 
 	return api

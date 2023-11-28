@@ -10,7 +10,7 @@ import (
 	"github.com/grantjforrester/go-ticket/pkg/collection"
 )
 
-func (a *Api) registerTickets() {
+func (a *Api) registerTicketsApi() {
 	log.Println("registering tickets")
 	a.router.HandleFunc("/tickets", a.queryTickets).Methods("GET")
 	a.router.HandleFunc("/tickets", a.createTicket).Methods("POST")
