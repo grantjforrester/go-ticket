@@ -1,0 +1,170 @@
+openapi: 3.0.0
+info:
+  title: Tickets
+  description: Development exercise to explore language and library capabilities by building a simple ticketing application.
+  version: 0.0.1
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development server
+paths:
+  /tickets:
+    get:
+      summary: Returns a list of tickets.
+      description: Optional extended description in CommonMark or HTML.
+      parameters:
+        - name: page
+          in: query
+          description: Page number. Default is 1.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: size
+          in: query
+          description: Number of results. Default is 100.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: sort
+          in: query
+          description: Sort order of results. Format of each sort is `<field> asc | desc`. Default is undefined.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+            collectionFormat: multi
+        - name: filter
+          in: query
+          description: Only return items matching filters. Format of each filter is `<field><operator><value>`. Default is return all.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+            collectionFormat: multi
+      responses:
+        "200":
+          description: A page of tickets
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Page"
+      tags:
+        - tickets
+    post:
+      summary: Creates a new ticket.
+      description: Optional extended description in CommonMark or HTML.
+      requestBody:
+        description: A new ticket
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Ticket"
+      responses:
+        "201": # status code
+          description: The new ticket
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TicketWithMetadata"
+      tags:
+        - tickets
+  /tickets/{id}:
+    get:
+      summary: Returns the ticket with id
+      parameters:
+        - name: id
+          in: path
+          description: Ticket id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: The ticket
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TicketWithMetadata"
+      tags:
+        - tickets
+    put:
+      summary: Updates the ticket with id
+      parameters:
+        - name: id
+          in: path
+          description: Ticket id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Updated ticket
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TicketWithMetadata"
+      responses:
+        "200":
+          description: The updated ticket
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TicketWithMetadata"
+      tags:
+        - tickets
+    delete:
+      summary: Deletes the ticket with id
+      parameters:
+        - name: id
+          in: path
+          description: Ticket id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Success
+      tags:
+        - tickets
+components:
+  schemas:
+    Page:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/TicketWithMetadata"
+        page:
+          type: number
+        size:
+          type: number
+      required: ["results", "page", "size"]
+    Ticket:
+      type: object
+      properties:
+        summary:
+          type: string
+        description:
+          type: string
+      required: ["summary"]
+    TicketWithMetadata:
+      allOf:
+        - "#/components/schemas/Metadata"
+        - "#/components/schemas/Ticket"
+    Metadata:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        version:
+          type: string
+      required: ["id", "version"]

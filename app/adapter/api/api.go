@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	_ "embed"
 	"errors"
 	"fmt"
 	"log"
@@ -24,6 +25,9 @@ type Api struct {
 	mediaHandler media.Handler
 }
 
+//go:embed openapi.yml
+var openapi []byte
+
 func NewApi(config config.Provider, svc service.TicketService, mh media.Handler) Api {
 	p := config.GetInt("api_port")
 
@@ -34,6 +38,11 @@ func NewApi(config config.Provider, svc service.TicketService, mh media.Handler)
 
 	// register standard endpoints
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) })
+	r.HandleFunc("/openapi.yml", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		w.Write(openapi)
+	})
+
 	// register application endpoints
 	api.registerTicketsApi()
 
