@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 )
 
@@ -22,17 +23,15 @@ func (j JSONHandler) ReadResource(req *http.Request, resource any) error {
 	return json.Unmarshal(jsonBytes, resource)
 }
 
-func (j JSONHandler) WriteResponse(resp http.ResponseWriter, status int, resource any) error {
+func (j JSONHandler) WriteResponse(resp http.ResponseWriter, status int, resource any) {
 	resp.Header().Set("Content-Type", "application/json")
 	resp.WriteHeader(status)
 	if resource != nil {
 		err := json.NewEncoder(resp).Encode(resource)
 		if err != nil {
-			return fmt.Errorf("failed to write response: %w", err)
+			log.Panicf("Could not encode resource to JSON: %v", err)
 		}
 	}
-
-	return nil
 }
 
 func (j JSONHandler) WriteError(resp http.ResponseWriter, err error) {
