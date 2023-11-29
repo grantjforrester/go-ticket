@@ -1,7 +1,6 @@
 package api
 
 import (
-	"log"
 	"net/http"
 	"net/url"
 	"path"
@@ -13,7 +12,6 @@ import (
 )
 
 func (api *API) registerTicketRoutes(router *mux.Router) {
-	log.Println("registering tickets")
 	router.HandleFunc("/tickets", api.queryTickets).Methods("GET")
 	router.HandleFunc("/tickets", api.createTicket).Methods("POST")
 	router.HandleFunc("/tickets/{key}", api.readTicket).Methods("GET")
