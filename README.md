@@ -10,7 +10,19 @@ Set required environment variables:
 source .env
 ```
 
-Run the server:
+Run the server with all service dependencies using docker-compose:
+
+```
+docker-compose --profile include_app up --build
+```
+
+Run the service dependencies only using docker-compose:
+
+```
+docker-compose up
+```
+
+Run the server only without Docker:
 
 ```
 go run ./cmd/server
