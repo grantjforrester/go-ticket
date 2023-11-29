@@ -4,13 +4,13 @@ WORKDIR /build
 
 COPY ./ ./
 RUN go mod download
-RUN go build ./cmd/main
+RUN go build ./cmd/server
 
 FROM alpine:3.16
 
 WORKDIR /app
 
-COPY --from=build /build/main server
+COPY --from=build /build/server server
 
 CMD adduser daemon
 
