@@ -15,6 +15,8 @@ type SQLTicketRepository struct {
 	connectionPool *sql.DB
 }
 
+var _ repository.Repository[ticket.TicketWithMetadata] = (*SQLTicketRepository)(nil)
+
 func NewSQLTicketRepository(pool *sql.DB) SQLTicketRepository {
 	return SQLTicketRepository{connectionPool: pool}
 }

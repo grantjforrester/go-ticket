@@ -25,6 +25,8 @@ type RFC7807ErrorMapper struct {
 	errorMap     map[string]RFC7807ErrorMapping
 }
 
+var _ ErrorMapper = (*RFC7807ErrorMapper)(nil)
+
 func NewRFC7807ErrorMapper(uriPrefix string, defaultError RFC7807ErrorMapping) RFC7807ErrorMapper {
 	errorMap := make(map[string]RFC7807ErrorMapping)
 	return RFC7807ErrorMapper{
