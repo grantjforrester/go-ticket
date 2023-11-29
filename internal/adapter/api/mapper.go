@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/grantjforrester/go-ticket/pkg/media"
 
-	"github.com/grantjforrester/go-ticket/app/service"
+	"github.com/grantjforrester/go-ticket/internal/service"
 )
 
 func NewErrorMapper() media.ErrorMapper {

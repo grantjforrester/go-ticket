@@ -14,7 +14,7 @@ import (
 	"github.com/grantjforrester/go-ticket/pkg/config"
 	"github.com/grantjforrester/go-ticket/pkg/media"
 
-	"github.com/grantjforrester/go-ticket/app/service"
+	"github.com/grantjforrester/go-ticket/internal/service"
 )
 
 type API struct {

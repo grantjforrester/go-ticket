@@ -3,9 +3,9 @@ package main
 import (
 	_ "github.com/lib/pq"
 
-	"github.com/grantjforrester/go-ticket/app/adapter/api"
-	"github.com/grantjforrester/go-ticket/app/adapter/repository"
-	"github.com/grantjforrester/go-ticket/app/service"
+	"github.com/grantjforrester/go-ticket/internal/adapter/api"
+	"github.com/grantjforrester/go-ticket/internal/adapter/repository"
+	"github.com/grantjforrester/go-ticket/internal/service"
 	"github.com/grantjforrester/go-ticket/pkg/authz"
 	"github.com/grantjforrester/go-ticket/pkg/config"
 	"github.com/grantjforrester/go-ticket/pkg/media"

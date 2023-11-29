@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/grantjforrester/go-ticket/app/service"
+	"github.com/grantjforrester/go-ticket/internal/service"
 	"github.com/grantjforrester/go-ticket/pkg/collection"
 	"github.com/grantjforrester/go-ticket/pkg/repository"
 	"github.com/grantjforrester/go-ticket/pkg/ticket"
