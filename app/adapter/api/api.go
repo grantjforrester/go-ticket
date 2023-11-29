@@ -20,7 +20,6 @@ import (
 type API struct {
 	port         int
 	server       *http.Server
-	router       *mux.Router
 	services     Services
 	mediaHandler media.Handler
 }
@@ -43,7 +42,10 @@ func NewAPI(config config.Provider, svcs Services, mh media.Handler) API {
 	rtr.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) })
 	rtr.HandleFunc("/openapi.yml", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
-		w.Write(openapi)
+		_, err := w.Write(openapi)
+		if err != nil {
+			mh.WriteError(w, err)
+		}
 	})
 
 	// register api routes
@@ -75,6 +77,6 @@ func (api API) Stop() {
 	log.Println("Stopping API on port", api.port)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	api.server.Shutdown(ctx)
+	_ = api.server.Shutdown(ctx)
 	log.Println("API stopped")
 }
