@@ -42,3 +42,13 @@ open -na /Applications/Google\ Chrome.app --args --user-data-dir="/var/tmp/insec
 Open the Swagger UI found at `http://localhost:3200`.
 
 Change the OpenAPI document used by Swagger UI to `http://localhost:8080/openapi.yml`.
+
+## Testing
+
+### Unit Tests
+
+To run all the unit tests:
+
+```
+go test ./...
+```
