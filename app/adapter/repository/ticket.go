@@ -5,29 +5,29 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/grantjforrester/go-ticket/app/model"
 	"github.com/grantjforrester/go-ticket/app/service"
 	"github.com/grantjforrester/go-ticket/pkg/collection"
 	"github.com/grantjforrester/go-ticket/pkg/repository"
+	"github.com/grantjforrester/go-ticket/pkg/ticket"
 )
 
-type SqlTicketRepository struct {
+type SQLTicketRepository struct {
 	connectionPool *sql.DB
 }
 
-func NewSqlTicketRepository(pool *sql.DB) SqlTicketRepository {
-	return SqlTicketRepository{connectionPool: pool}
+func NewSQLTicketRepository(pool *sql.DB) SQLTicketRepository {
+	return SQLTicketRepository{connectionPool: pool}
 }
 
-func (s SqlTicketRepository) Create(tx repository.Tx, ticket model.TicketWithMetadata) (model.TicketWithMetadata, error) {
+func (s SQLTicketRepository) Create(tx repository.Tx, t ticket.TicketWithMetadata) (ticket.TicketWithMetadata, error) {
 	ptx := tx.(*sql.Tx)
 	var uuid string
 
 	err := ptx.QueryRow(`INSERT INTO tickets (id, version, summary, description)
 			  				VALUES (uuid_generate_v4(), 0, $1, $2)
-			  				RETURNING id`, ticket.Summary, ticket.Description).Scan(&uuid)
+			  				RETURNING id`, t.Summary, t.Description).Scan(&uuid)
 	if err != nil {
-		return model.TicketWithMetadata{}, fmt.Errorf("create ticket failed: %w", err)
+		return ticket.TicketWithMetadata{}, fmt.Errorf("create ticket failed: %w", err)
 	}
 
 	createdTicket, err := s.Read(tx, uuid)
@@ -35,53 +35,53 @@ func (s SqlTicketRepository) Create(tx repository.Tx, ticket model.TicketWithMet
 	return createdTicket, err
 }
 
-func (s SqlTicketRepository) Read(tx repository.Tx, ticketId string) (model.TicketWithMetadata, error) {
+func (s SQLTicketRepository) Read(tx repository.Tx, ticketID string) (ticket.TicketWithMetadata, error) {
 	ptx := tx.(*sql.Tx)
 	row := ptx.QueryRow(`SELECT id, version, summary, description 
 						 	FROM tickets
-							WHERE id = $1`, ticketId)
+							WHERE id = $1`, ticketID)
 
-	ticket := model.TicketWithMetadata{}
-	switch err := row.Scan(&ticket.Id, &ticket.Version, &ticket.Summary, &ticket.Description); err {
+	t := ticket.TicketWithMetadata{}
+	switch err := row.Scan(&t.ID, &t.Version, &t.Summary, &t.Description); err {
 	case nil:
-		return ticket, nil
+		return t, nil
 	case sql.ErrNoRows:
-		return model.TicketWithMetadata{}, &service.NotFoundError{Message: fmt.Sprintf("no ticket with id %s found", ticketId)}
+		return ticket.TicketWithMetadata{}, &service.NotFoundError{Message: fmt.Sprintf("no ticket with id %s found", ticketID)}
 	default:
-		return model.TicketWithMetadata{}, err
+		return ticket.TicketWithMetadata{}, err
 	}
 }
 
-func (s SqlTicketRepository) Update(tx repository.Tx, ticket model.TicketWithMetadata) (model.TicketWithMetadata, error) {
+func (s SQLTicketRepository) Update(tx repository.Tx, t ticket.TicketWithMetadata) (ticket.TicketWithMetadata, error) {
 	ptx := tx.(*sql.Tx)
-	_, err := s.Read(tx, ticket.Metadata.Id)
+	_, err := s.Read(tx, t.Metadata.ID)
 	if err != nil {
-		return model.TicketWithMetadata{}, fmt.Errorf("update ticket failed (1): %w", err)
+		return ticket.TicketWithMetadata{}, fmt.Errorf("update ticket failed (1): %w", err)
 	}
 
 	res, err := ptx.Exec(`UPDATE tickets
 							SET summary = $3, description = $4
 							WHERE id = $1
 							AND version = $2`,
-		ticket.Id, ticket.Version, ticket.Summary, ticket.Description)
+		t.ID, t.Version, t.Summary, t.Description)
 	if err != nil {
-		return model.TicketWithMetadata{}, fmt.Errorf("update ticket failed (2): %w", err)
+		return ticket.TicketWithMetadata{}, fmt.Errorf("update ticket failed (2): %w", err)
 	}
 
 	rowCount, err := res.RowsAffected()
 	if err != nil {
-		return model.TicketWithMetadata{}, fmt.Errorf("update ticket failed (3): no rows updated")
+		return ticket.TicketWithMetadata{}, fmt.Errorf("update ticket failed (3): no rows updated")
 	}
 	if rowCount != 1 {
-		return model.TicketWithMetadata{}, &service.ConflictError{Message: "update ticket failed (4): version conflict"}
+		return ticket.TicketWithMetadata{}, &service.ConflictError{Message: "update ticket failed (4): version conflict"}
 	}
 
-	return s.Read(tx, ticket.Metadata.Id)
+	return s.Read(tx, t.Metadata.ID)
 }
 
-func (s SqlTicketRepository) Delete(tx repository.Tx, ticketId string) error {
+func (s SQLTicketRepository) Delete(tx repository.Tx, ticketID string) error {
 	ptx := tx.(*sql.Tx)
-	_, err := ptx.Exec(`DELETE FROM tickets WHERE id = $1`, ticketId)
+	_, err := ptx.Exec(`DELETE FROM tickets WHERE id = $1`, ticketID)
 	if err != nil {
 		return fmt.Errorf("delete ticket failed: %w", err)
 	}
@@ -89,40 +89,40 @@ func (s SqlTicketRepository) Delete(tx repository.Tx, ticketId string) error {
 	return nil
 }
 
-func (s SqlTicketRepository) Query(tx repository.Tx, query collection.Query) (collection.Page[model.TicketWithMetadata], error) {
+func (s SQLTicketRepository) Query(tx repository.Tx, query collection.QuerySpec) (collection.Page[ticket.TicketWithMetadata], error) {
 	ptx := tx.(*sql.Tx)
-	results := []model.TicketWithMetadata{}
+	results := []ticket.TicketWithMetadata{}
 
 	rows, err := ptx.Query(`SELECT id, version, summary, description FROM tickets`)
 	if err != nil {
-		return collection.Page[model.TicketWithMetadata]{},
+		return collection.Page[ticket.TicketWithMetadata]{},
 			fmt.Errorf("query tickets failed (1): %w", err)
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		ticket := model.TicketWithMetadata{}
-		err := rows.Scan(&ticket.Id, &ticket.Version, &ticket.Summary, &ticket.Description)
+		t := ticket.TicketWithMetadata{}
+		err := rows.Scan(&t.ID, &t.Version, &t.Summary, &t.Description)
 		if err != nil {
-			return collection.Page[model.TicketWithMetadata]{},
+			return collection.Page[ticket.TicketWithMetadata]{},
 				fmt.Errorf("query tickets failed (2): %w", err)
 		}
-		results = append(results, ticket)
+		results = append(results, t)
 	}
 
-	sz := uint64(len(results))
-	pg := uint64(0)
-	if sz > 0 {
-		pg = query.Page
+	size := uint64(len(results))
+	page := uint64(0)
+	if size > 0 {
+		page = query.Page
 	}
-	return collection.Page[model.TicketWithMetadata]{
+	return collection.Page[ticket.TicketWithMetadata]{
 		Results: results,
-		Page:    pg,
-		Size:    sz,
+		Page:    page,
+		Size:    size,
 	}, nil
 }
 
-func (s SqlTicketRepository) StartTx(ctx context.Context, readOnly bool) (repository.Tx, error) {
+func (s SQLTicketRepository) StartTx(ctx context.Context, readOnly bool) (repository.Tx, error) {
 	opts := sql.TxOptions{Isolation: sql.LevelDefault, ReadOnly: readOnly}
 	tx, err := s.connectionPool.BeginTx(ctx, &opts)
 	if err != nil {

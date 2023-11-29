@@ -17,60 +17,64 @@ import (
 	"github.com/grantjforrester/go-ticket/app/service"
 )
 
-type Api struct {
+type API struct {
 	port         int
 	server       *http.Server
 	router       *mux.Router
-	service      service.TicketService
+	services     Services
 	mediaHandler media.Handler
+}
+
+type Services struct {
+	Ticket service.TicketService
 }
 
 //go:embed openapi.yml
 var openapi []byte
 
-func NewApi(config config.Provider, svc service.TicketService, mh media.Handler) Api {
-	p := config.GetInt("api_port")
+func NewAPI(config config.Provider, svcs Services, mh media.Handler) API {
+	prt := config.GetInt("api_port")
 
-	r := mux.NewRouter()
-	ar := r.PathPrefix("/api/v1").Subrouter()
-	srv := &http.Server{Addr: fmt.Sprintf(":%d", p), Handler: r}
-	api := Api{port: p, server: srv, router: ar, service: svc, mediaHandler: mh}
+	rtr := mux.NewRouter()
+	srv := &http.Server{Addr: fmt.Sprintf(":%d", prt), Handler: rtr}
+	api := API{port: prt, server: srv, services: svcs, mediaHandler: mh}
 
 	// register standard endpoints
-	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) })
-	r.HandleFunc("/openapi.yml", func(w http.ResponseWriter, r *http.Request) {
+	rtr.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) })
+	rtr.HandleFunc("/openapi.yml", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		w.Write(openapi)
 	})
 
-	// register application endpoints
-	api.registerTicketsApi()
+	// register api routes
+	v1 := rtr.PathPrefix("/api/v1").Subrouter()
+	api.registerTicketRoutes(v1)
 
 	// default not found
-	r.NotFoundHandler = http.HandlerFunc(api.PathNotFound)
+	rtr.NotFoundHandler = http.HandlerFunc(api.PathNotFound)
 
 	return api
 }
 
-func (a Api) PathNotFound(w http.ResponseWriter, r *http.Request) {
+func (api API) PathNotFound(w http.ResponseWriter, r *http.Request) {
 	err := PathNotFoundError{Message: "resource not found: " + r.RequestURI}
-	a.mediaHandler.WriteError(w, &err)
+	api.mediaHandler.WriteError(w, &err)
 }
 
-func (a Api) Start() {
+func (api API) Start() {
 	go func() {
-		log.Println("API started on port", a.port)
-		err := a.server.ListenAndServe()
+		log.Println("API started on port", api.port)
+		err := api.server.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Panicln(err)
 		}
 	}()
 }
 
-func (a Api) Stop() {
-	log.Println("Stopping API on port", a.port)
+func (api API) Stop() {
+	log.Println("Stopping API on port", api.port)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	a.server.Shutdown(ctx)
+	api.server.Shutdown(ctx)
 	log.Println("API stopped")
 }

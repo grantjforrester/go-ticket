@@ -6,92 +6,94 @@ import (
 	"net/url"
 	"path"
 
-	"github.com/grantjforrester/go-ticket/app/model"
+	"github.com/gorilla/mux"
+
 	"github.com/grantjforrester/go-ticket/pkg/collection"
+	"github.com/grantjforrester/go-ticket/pkg/ticket"
 )
 
-func (a *Api) registerTicketsApi() {
+func (api *API) registerTicketRoutes(router *mux.Router) {
 	log.Println("registering tickets")
-	a.router.HandleFunc("/tickets", a.queryTickets).Methods("GET")
-	a.router.HandleFunc("/tickets", a.createTicket).Methods("POST")
-	a.router.HandleFunc("/tickets/{key}", a.readTicket).Methods("GET")
-	a.router.HandleFunc("/tickets/{key}", a.updateTicket).Methods("PUT")
-	a.router.HandleFunc("/tickets/{key}", a.deleteTicket).Methods("DELETE")
+	router.HandleFunc("/tickets", api.queryTickets).Methods("GET")
+	router.HandleFunc("/tickets", api.createTicket).Methods("POST")
+	router.HandleFunc("/tickets/{key}", api.readTicket).Methods("GET")
+	router.HandleFunc("/tickets/{key}", api.updateTicket).Methods("PUT")
+	router.HandleFunc("/tickets/{key}", api.deleteTicket).Methods("DELETE")
 }
 
-func (a *Api) queryTickets(w http.ResponseWriter, r *http.Request) {
-	rqlQuery, _ := url.ParseQuery(r.URL.RawQuery)
-	query, err := collection.ParseQuery(rqlQuery)
+func (api *API) queryTickets(resp http.ResponseWriter, req *http.Request) {
+	urlQuery, _ := url.ParseQuery(req.URL.RawQuery)
+	querySpec, err := collection.ParseQuery(urlQuery)
 	if err != nil {
-		a.mediaHandler.WriteError(w, err)
+		api.mediaHandler.WriteError(resp, err)
 		return
 	}
 
-	alerts, err := a.service.QueryTickets(r.Context(), query)
+	tickets, err := api.services.Ticket.QueryTickets(req.Context(), querySpec)
 	if err != nil {
-		a.mediaHandler.WriteError(w, err)
+		api.mediaHandler.WriteError(resp, err)
 		return
 	}
 
-	a.mediaHandler.WriteResponse(w, http.StatusOK, alerts)
+	api.mediaHandler.WriteResponse(resp, http.StatusOK, tickets)
 }
 
-func (a *Api) readTicket(w http.ResponseWriter, r *http.Request) {
-	alertId := path.Base(r.URL.Path)
+func (api *API) readTicket(resp http.ResponseWriter, req *http.Request) {
+	ticketID := path.Base(req.URL.Path)
 
-	alert, err := a.service.ReadTicket(r.Context(), alertId)
+	ticket, err := api.services.Ticket.ReadTicket(req.Context(), ticketID)
 	if err != nil {
-		a.mediaHandler.WriteError(w, err)
+		api.mediaHandler.WriteError(resp, err)
 		return
 	}
 
-	a.mediaHandler.WriteResponse(w, http.StatusOK, alert)
+	api.mediaHandler.WriteResponse(resp, http.StatusOK, ticket)
 }
 
-func (a *Api) createTicket(w http.ResponseWriter, r *http.Request) {
-	inAlert := model.TicketWithMetadata{}
-	err := a.mediaHandler.ReadResource(r, &inAlert)
+func (api *API) createTicket(resp http.ResponseWriter, req *http.Request) {
+	inTicket := ticket.TicketWithMetadata{}
+	err := api.mediaHandler.ReadResource(req, &inTicket)
 	if err != nil {
-		a.mediaHandler.WriteError(w, err)
+		api.mediaHandler.WriteError(resp, err)
 		return
 	}
 
-	createdAlert, err := a.service.CreateTicket(r.Context(), inAlert)
+	createdTicket, err := api.services.Ticket.CreateTicket(req.Context(), inTicket)
 	if err != nil {
-		a.mediaHandler.WriteError(w, err)
+		api.mediaHandler.WriteError(resp, err)
 		return
 	}
 
-	a.mediaHandler.WriteResponse(w, http.StatusCreated, createdAlert)
+	api.mediaHandler.WriteResponse(resp, http.StatusCreated, createdTicket)
 }
 
-func (a *Api) updateTicket(w http.ResponseWriter, r *http.Request) {
-	alertId := path.Base(r.URL.Path)
-	inAlert := model.TicketWithMetadata{}
-	err := a.mediaHandler.ReadResource(r, &inAlert)
+func (api *API) updateTicket(resp http.ResponseWriter, req *http.Request) {
+	ticketID := path.Base(req.URL.Path)
+	inTicket := ticket.TicketWithMetadata{}
+	err := api.mediaHandler.ReadResource(req, &inTicket)
 	if err != nil {
-		a.mediaHandler.WriteError(w, err)
+		api.mediaHandler.WriteError(resp, err)
 		return
 	}
-	inAlert.Id = alertId
+	inTicket.ID = ticketID
 
-	updatedAlert, err := a.service.UpdateTicket(r.Context(), inAlert)
+	updatedTicket, err := api.services.Ticket.UpdateTicket(req.Context(), inTicket)
 	if err != nil {
-		a.mediaHandler.WriteError(w, err)
+		api.mediaHandler.WriteError(resp, err)
 		return
 	}
 
-	a.mediaHandler.WriteResponse(w, http.StatusOK, updatedAlert)
+	api.mediaHandler.WriteResponse(resp, http.StatusOK, updatedTicket)
 }
 
-func (a *Api) deleteTicket(w http.ResponseWriter, r *http.Request) {
-	alertId := path.Base(r.URL.Path)
+func (api *API) deleteTicket(resp http.ResponseWriter, req *http.Request) {
+	ticketID := path.Base(req.URL.Path)
 
-	err := a.service.DeleteAlert(r.Context(), alertId)
+	err := api.services.Ticket.DeleteAlert(req.Context(), ticketID)
 	if err != nil {
-		a.mediaHandler.WriteError(w, err)
+		api.mediaHandler.WriteError(resp, err)
 		return
 	}
 
-	a.mediaHandler.WriteResponse(w, http.StatusNoContent, nil)
+	api.mediaHandler.WriteResponse(resp, http.StatusNoContent, nil)
 }

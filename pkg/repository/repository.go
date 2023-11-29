@@ -12,7 +12,7 @@ type Repository[T any] interface {
 	Update(Tx, T) (T, error)
 	Delete(Tx, string) error
 
-	Query(Tx, collection.Query) (collection.Page[T], error)
+	Query(Tx, collection.QuerySpec) (collection.Page[T], error)
 
 	StartTx(context.Context, bool) (Tx, error)
 }

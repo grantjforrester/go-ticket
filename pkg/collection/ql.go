@@ -9,52 +9,59 @@ import (
 
 // symbols
 const (
-	PAGE   string    = "page"
-	SIZE   string    = "size"
-	SORT   string    = "sort"
-	FILTER string    = "filter"
-	ASC    Direction = "asc"
-	DESC   Direction = "desc"
-	EQ     Operator  = "=="
-	NE     Operator  = "!="
-	GT     Operator  = ">"
-	LT     Operator  = "<"
-	GE     Operator  = ">="
-	LE     Operator  = "<="
+	ParamPage   string    = "page"
+	ParamSize   string    = "size"
+	ParamSort   string    = "sort"
+	ParamFilter string    = "filter"
+	SortAsc     Direction = "asc"
+	SortDesc    Direction = "desc"
+	OpEq        Operator  = "=="
+	OpNe        Operator  = "!="
+	OpGt        Operator  = ">"
+	OpLt        Operator  = "<"
+	OpGe        Operator  = ">="
+	OpLe        Operator  = "<="
 
-	DEFAULT_PAGE = uint64(1)
-	DEFAULT_SIZE = uint64(100)
+	DefaultPage = "1"
+	DefaultSize = "100"
 )
 
-var FIELD_PATTERN = `\w+`
-var VALUE_PATTERN = `.+`
-var OPERATOR_PATTERN = fmt.Sprintf("%s|%s|%s|%s|%s|%s", EQ, NE, GT, LT, GE, LE)
-var FILTER_PATTERN = fmt.Sprintf("(%s)(%s)(%s)", FIELD_PATTERN, OPERATOR_PATTERN, VALUE_PATTERN)
-var SORT_PATTERN = fmt.Sprintf("(%s) (%s|%s)", FIELD_PATTERN, ASC, DESC)
+var FieldPattern = `\w+`
+var ValuePattern = `.+`
+var OperatorPattern = fmt.Sprintf("%s|%s|%s|%s|%s|%s", OpEq, OpNe, OpGt, OpLt, OpGe, OpLe)
+var FilterPattern = fmt.Sprintf("(%s)(%s)(%s)", FieldPattern, OperatorPattern, ValuePattern)
+var SortPattern = fmt.Sprintf("(%s) (%s|%s)", FieldPattern, SortAsc, SortDesc)
 
-func ParseQuery(urlQuery url.Values) (Query, error) {
-	var frx = regexp.MustCompile(FILTER_PATTERN)
-	var srx = regexp.MustCompile(SORT_PATTERN)
+func ParseQuery(urlQuery url.Values) (QuerySpec, error) {
+	var (
+		frx = regexp.MustCompile(FilterPattern)
+		srx = regexp.MustCompile(SortPattern)
+	)
 
-	q := Query{}
+	q := QuerySpec{}
 
-	fs, err := parseFilters(urlQuery[FILTER], *frx)
+	fs, err := parseFilters(urlQuery[ParamFilter], *frx)
 	if err != nil {
-		return Query{}, fmt.Errorf("invalid query: %w", err)
+		return QuerySpec{}, fmt.Errorf("invalid query: %w", err)
 	}
 	q.Filters = fs
 
-	ss, err := parseSorts(urlQuery[SORT], *srx)
+	ss, err := parseSorts(urlQuery[ParamSort], *srx)
 	if err != nil {
-		return Query{}, fmt.Errorf("invalid query: %w", err)
+		return QuerySpec{}, fmt.Errorf("invalid query: %w", err)
 	}
 	q.Sorts = ss
 
-	pg, sz, err := parsePage(urlQuery.Get(PAGE), urlQuery.Get(SIZE))
+	pg, err := parsePage(urlQuery.Get(ParamPage))
 	if err != nil {
-		return Query{}, fmt.Errorf("invalid query: %w", err)
+		return QuerySpec{}, fmt.Errorf("invalid query: %w", err)
 	}
 	q.Page = pg
+
+	sz, err := parseSize(urlQuery.Get(ParamSize))
+	if err != nil {
+		return QuerySpec{}, fmt.Errorf("invalid query: %w", err)
+	}
 	q.Size = sz
 
 	return q, nil
@@ -90,24 +97,28 @@ func parseSorts(clauses []string, regexp regexp.Regexp) ([]SortSpec, error) {
 	return srts, nil
 }
 
-func parsePage(page string, size string) (uint64, uint64, error) {
-	var pg = DEFAULT_PAGE
-	var err error
-
-	if page != "" {
-		pg, err = strconv.ParseUint(page, 10, 64)
-		if err != nil || pg == 0 {
-			return 0, 0, fmt.Errorf("invalid page: %s", page)
-		}
+func parsePage(page string) (uint64, error) {
+	if page == "" {
+		page = DefaultPage
 	}
 
-	var sz = DEFAULT_SIZE
-	if size != "" {
-		sz, err = strconv.ParseUint(size, 10, 64)
-		if err != nil || sz == 0 {
-			return 0, 0, fmt.Errorf("invalid size: %s", size)
-		}
+	pg, err := strconv.ParseUint(page, 10, 64)
+	if err != nil || pg == 0 {
+		return 0, fmt.Errorf("invalid page: %s", page)
 	}
 
-	return pg, sz, nil
+	return pg, nil
+}
+
+func parseSize(size string) (uint64, error) {
+	if size == "" {
+		size = DefaultSize
+	}
+
+	sz, err := strconv.ParseUint(size, 10, 64)
+	if err != nil || sz == 0 {
+		return 0, fmt.Errorf("invalid size: %s", size)
+	}
+
+	return sz, nil
 }

@@ -13,6 +13,6 @@ type AlwaysAuthorize struct {
 
 var _ Authorizer = (*AlwaysAuthorize)(nil)
 
-func (a AlwaysAuthorize) IsAuthorized(c context.Context, operation Operation) error {
+func (a AlwaysAuthorize) IsAuthorized(_ context.Context, operation Operation) error {
 	return nil
 }

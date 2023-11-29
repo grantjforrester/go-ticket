@@ -1,10 +1,10 @@
-package model
+package ticket
 
 type Metadata struct {
-	Id      string `json:"id"`
+	ID      string `json:"id"`
 	Version string `json:"version"`
 }
 
 func NewMetadata(id string, version string) Metadata {
-	return Metadata{Id: id, Version: version}
+	return Metadata{ID: id, Version: version}
 }

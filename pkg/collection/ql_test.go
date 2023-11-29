@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/grantjforrester/go-ticket/pkg/collection"
 )
@@ -17,11 +18,11 @@ func TestShouldReturnEmpty(t *testing.T) {
 	result, err := collection.ParseQuery(query)
 
 	// Then
-	assert.Nil(t, err)
-	assert.Len(t, result.Filters, 0)
-	assert.Len(t, result.Sorts, 0)
-	assert.Equal(t, result.Page, uint64(1))
-	assert.Equal(t, result.Size, uint64(100))
+	require.NoError(t, err)
+	assert.Empty(t, result.Filters)
+	assert.Empty(t, result.Sorts)
+	assert.Equal(t, uint64(1), result.Page)
+	assert.Equal(t, uint64(100), result.Size)
 }
 
 func TestShouldReturnFilter(t *testing.T) {
@@ -32,11 +33,11 @@ func TestShouldReturnFilter(t *testing.T) {
 	result, err := collection.ParseQuery(query)
 
 	// Then
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, result.Filters, 1)
-	assert.Equal(t, result.Filters[0].Field, "foo")
-	assert.Equal(t, result.Filters[0].Operator, collection.EQ)
-	assert.Equal(t, result.Filters[0].Value, "bar")
+	assert.Equal(t, "foo", result.Filters[0].Field)
+	assert.Equal(t, collection.OpEq, result.Filters[0].Operator)
+	assert.Equal(t, "bar", result.Filters[0].Value)
 }
 
 func TestShouldReturnErrorOnInvalidFilter(t *testing.T) {
@@ -47,7 +48,7 @@ func TestShouldReturnErrorOnInvalidFilter(t *testing.T) {
 	_, err := collection.ParseQuery(query)
 
 	// Then
-	assert.NotNil(t, err)
+	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "filter")
 	assert.Contains(t, err.Error(), "foo")
 }
@@ -60,10 +61,10 @@ func TestShouldReturnSort(t *testing.T) {
 	result, err := collection.ParseQuery(query)
 
 	// Then
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, result.Sorts, 1)
-	assert.Equal(t, result.Sorts[0].Field, "foo")
-	assert.Equal(t, result.Sorts[0].Direction, collection.ASC)
+	assert.Equal(t, "foo", result.Sorts[0].Field)
+	assert.Equal(t, collection.SortAsc, result.Sorts[0].Direction)
 }
 
 func TestShouldReturnErrorInInvalidSort(t *testing.T) {
@@ -74,7 +75,7 @@ func TestShouldReturnErrorInInvalidSort(t *testing.T) {
 	_, err := collection.ParseQuery(query)
 
 	// Then
-	assert.NotNil(t, err)
+	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "sort")
 	assert.Contains(t, err.Error(), "foo")
 }
@@ -87,7 +88,7 @@ func TestShouldReturnPageSpecWithIndexAndNoSize(t *testing.T) {
 	result, err := collection.ParseQuery(query)
 
 	// Then
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, uint64(1), result.Page)
 	assert.Equal(t, uint64(100), result.Size)
 }
@@ -100,7 +101,7 @@ func TestShouldReturnPageSpecWithIndexAndSize(t *testing.T) {
 	result, err := collection.ParseQuery(query)
 
 	// Then
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, uint64(2), result.Page)
 	assert.Equal(t, uint64(100), result.Size)
 }
@@ -113,7 +114,7 @@ func TestShouldReturnErrorOnZeroPageIndex(t *testing.T) {
 	_, err := collection.ParseQuery(query)
 
 	// Then
-	assert.NotNil(t, err)
+	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "page")
 	assert.Contains(t, err.Error(), "0")
 }
@@ -126,7 +127,7 @@ func TestShouldReturnErrorOnInvalidPageIndex(t *testing.T) {
 	_, err := collection.ParseQuery(query)
 
 	// Then
-	assert.NotNil(t, err)
+	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "page")
 	assert.Contains(t, err.Error(), "foo")
 }
@@ -139,7 +140,7 @@ func TestShouldReturnErrorOnZeroPageSize(t *testing.T) {
 	_, err := collection.ParseQuery(query)
 
 	// Then
-	assert.NotNil(t, err)
+	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "size")
 	assert.Contains(t, err.Error(), "0")
 }
@@ -152,7 +153,7 @@ func TestShouldReturnErrorOnInvalidPageSize(t *testing.T) {
 	_, err := collection.ParseQuery(query)
 
 	// Then
-	assert.NotNil(t, err)
+	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "size")
 	assert.Contains(t, err.Error(), "foo")
 }

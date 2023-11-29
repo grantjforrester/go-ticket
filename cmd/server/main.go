@@ -6,15 +6,13 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/grantjforrester/go-ticket/app"
-
 	"github.com/spf13/viper"
 )
 
 func main() {
 	config := viper.New()
 	config.AutomaticEnv()
-	app := app.NewApp(config)
+	app := NewApp(config)
 	app.Start()
 
 	sig := make(chan os.Signal, 1)

@@ -1,4 +1,4 @@
-package app
+package main
 
 import (
 	_ "github.com/lib/pq"
@@ -18,17 +18,16 @@ type App interface {
 
 func NewApp(config config.Provider) App {
 	// secondary adapters
-	connectionPool := repository.NewSqlConnectionPool(config)
-	repository := repository.NewSqlTicketRepository(connectionPool)
+	connectionPool := repository.NewSQLConnectionPool(config)
+	repository := repository.NewSQLTicketRepository(connectionPool)
 
 	// services
 	authorizer := authz.AlwaysAuthorize{}
 	service := service.NewTicketService(repository, authorizer)
 
 	// primary adapters
-	mediaHandler := media.JsonHandler{ErrorMap: api.NewErrorMapper()}
-
-	api := api.NewApi(config, service, mediaHandler)
+	mediaHandler := media.JSONHandler{ErrorMap: api.NewErrorMapper()}
+	api := api.NewAPI(config, api.Services{Ticket: service}, mediaHandler)
 
 	return api
 }

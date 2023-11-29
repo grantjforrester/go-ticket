@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-type Query struct {
+type QuerySpec struct {
 	Filters []FilterSpec
 	Sorts   []SortSpec
 	Page    uint64
@@ -37,7 +37,7 @@ type FieldCapability struct {
 	Sort   bool
 }
 
-func (q Query) Validate(fieldCapabilities map[string]FieldCapability) error {
+func (q QuerySpec) Validate(fieldCapabilities map[string]FieldCapability) error {
 	for _, field := range q.Filters {
 		if f, ok := fieldCapabilities[field.Field]; !ok || !f.Filter {
 			return fmt.Errorf("invalid filter: %s", field.Field)

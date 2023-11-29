@@ -18,7 +18,7 @@ type validStruct struct {
 
 func TestShouldUnmarshallValidResource(t *testing.T) {
 	// Given
-	handler := jsonMedia.JsonHandler{}
+	handler := jsonMedia.JSONHandler{}
 	request := mockRequest(validStruct{Foo: "mock foo", Bar: 1})
 	resource := validStruct{}
 
@@ -26,12 +26,12 @@ func TestShouldUnmarshallValidResource(t *testing.T) {
 	err := handler.ReadResource(request, &resource)
 
 	// Then
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, validStruct{Foo: "mock foo", Bar: 1}, resource)
 }
 
 func mockRequest(body any) *http.Request {
-	jsonBytes, _ := json.Marshal(body)
-	request, _ := http.NewRequest(http.MethodPost, "http://example.com", bytes.NewReader(jsonBytes))
+	json, _ := json.Marshal(body)
+	request, _ := http.NewRequest(http.MethodPost, "http://example.com", bytes.NewReader(json))
 	return request
 }
