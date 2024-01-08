@@ -21,8 +21,8 @@ func TestShouldReturnEmpty(t *testing.T) {
 	require.NoError(t, err)
 	assert.Empty(t, result.Filters)
 	assert.Empty(t, result.Sorts)
-	assert.Equal(t, uint64(1), result.Page)
-	assert.Equal(t, uint64(100), result.Size)
+	assert.Equal(t, uint64(0), result.Page)
+	assert.Equal(t, uint64(0), result.Size)
 }
 
 func TestShouldReturnFilter(t *testing.T) {
@@ -90,7 +90,7 @@ func TestShouldReturnPageSpecWithIndexAndNoSize(t *testing.T) {
 	// Then
 	require.NoError(t, err)
 	assert.Equal(t, uint64(1), result.Page)
-	assert.Equal(t, uint64(100), result.Size)
+	assert.Equal(t, uint64(0), result.Size)
 }
 
 func TestShouldReturnPageSpecWithIndexAndSize(t *testing.T) {

@@ -21,9 +21,6 @@ const (
 	OpLt        Operator  = "<"
 	OpGe        Operator  = ">="
 	OpLe        Operator  = "<="
-
-	DefaultPage = "1"
-	DefaultSize = "100"
 )
 
 var FieldPattern = `\w+`
@@ -99,7 +96,7 @@ func parseSorts(clauses []string, regexp regexp.Regexp) ([]SortSpec, error) {
 
 func parsePage(page string) (uint64, error) {
 	if page == "" {
-		page = DefaultPage
+		return 0, nil
 	}
 
 	pg, err := strconv.ParseUint(page, 10, 64)
@@ -112,7 +109,7 @@ func parsePage(page string) (uint64, error) {
 
 func parseSize(size string) (uint64, error) {
 	if size == "" {
-		size = DefaultSize
+		return 0, nil
 	}
 
 	sz, err := strconv.ParseUint(size, 10, 64)

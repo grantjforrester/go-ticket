@@ -7,8 +7,8 @@ import (
 type QuerySpec struct {
 	Filters []FilterSpec
 	Sorts   []SortSpec
-	Page    uint64
-	Size    uint64
+	Page    uint64 // 0 is not set
+	Size    uint64 // 0 is not set
 }
 
 type FilterSpec struct {
@@ -37,6 +37,7 @@ type FieldCapability struct {
 	Sort   bool
 }
 
+// Validates the query against a set of field capabilities.
 func (q QuerySpec) Validate(fieldCapabilities map[string]FieldCapability) error {
 	for _, field := range q.Filters {
 		if f, ok := fieldCapabilities[field.Field]; !ok || !f.Filter {
