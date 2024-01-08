@@ -25,9 +25,9 @@ func (s SQLTicketRepository) Create(tx repository.Tx, t ticket.TicketWithMetadat
 	ptx := tx.(*sql.Tx)
 	var uuid string
 
-	err := ptx.QueryRow(`INSERT INTO tickets (id, version, summary, description)
-			  				VALUES (uuid_generate_v4(), 0, $1, $2)
-			  				RETURNING id`, t.Summary, t.Description).Scan(&uuid)
+	err := ptx.QueryRow(`INSERT INTO tickets (id, version, summary, description, status)
+			  				VALUES (uuid_generate_v4(), 0, $1, $2, $3)
+			  				RETURNING id`, t.Summary, t.Description, t.Status).Scan(&uuid)
 	if err != nil {
 		return ticket.TicketWithMetadata{}, fmt.Errorf("create ticket failed: %w", err)
 	}
@@ -39,12 +39,12 @@ func (s SQLTicketRepository) Create(tx repository.Tx, t ticket.TicketWithMetadat
 
 func (s SQLTicketRepository) Read(tx repository.Tx, ticketID string) (ticket.TicketWithMetadata, error) {
 	ptx := tx.(*sql.Tx)
-	row := ptx.QueryRow(`SELECT id, version, summary, description 
+	row := ptx.QueryRow(`SELECT id, version, summary, description, status 
 						 	FROM tickets
 							WHERE id = $1`, ticketID)
 
 	t := ticket.TicketWithMetadata{}
-	switch err := row.Scan(&t.ID, &t.Version, &t.Summary, &t.Description); err {
+	switch err := row.Scan(&t.ID, &t.Version, &t.Summary, &t.Description, &t.Status); err {
 	case nil:
 		return t, nil
 	case sql.ErrNoRows:
@@ -62,10 +62,10 @@ func (s SQLTicketRepository) Update(tx repository.Tx, t ticket.TicketWithMetadat
 	}
 
 	res, err := ptx.Exec(`UPDATE tickets
-							SET summary = $3, description = $4
+							SET summary = $3, description = $4, status = $5
 							WHERE id = $1
 							AND version = $2`,
-		t.ID, t.Version, t.Summary, t.Description)
+		t.ID, t.Version, t.Summary, t.Description, t.Status)
 	if err != nil {
 		return ticket.TicketWithMetadata{}, fmt.Errorf("update ticket failed (2): %w", err)
 	}
@@ -95,7 +95,9 @@ func (s SQLTicketRepository) Query(tx repository.Tx, query collection.QuerySpec)
 	ptx := tx.(*sql.Tx)
 	results := []ticket.TicketWithMetadata{}
 
-	rows, err := ptx.Query(`SELECT id, version, summary, description FROM tickets`)
+	rows, err := ptx.Query(`SELECT id, version, summary, description, status 
+							FROM tickets
+							LIMIT $1 OFFSET $2`, query.Size, (query.Page-1)*query.Size)
 	if err != nil {
 		return collection.Page[ticket.TicketWithMetadata]{},
 			fmt.Errorf("query tickets failed (1): %w", err)
@@ -104,7 +106,7 @@ func (s SQLTicketRepository) Query(tx repository.Tx, query collection.QuerySpec)
 
 	for rows.Next() {
 		t := ticket.TicketWithMetadata{}
-		err := rows.Scan(&t.ID, &t.Version, &t.Summary, &t.Description)
+		err := rows.Scan(&t.ID, &t.Version, &t.Summary, &t.Description, &t.Status)
 		if err != nil {
 			return collection.Page[ticket.TicketWithMetadata]{},
 				fmt.Errorf("query tickets failed (2): %w", err)

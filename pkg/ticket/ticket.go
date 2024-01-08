@@ -8,6 +8,7 @@ import (
 type Ticket struct {
 	Summary     string `json:"summary"`
 	Description string `json:"description"`
+	Status      string `json:"status"`
 }
 
 func (a Ticket) Validate() error {
@@ -17,8 +18,8 @@ func (a Ticket) Validate() error {
 		errs = append(errs, "invalid ticket: missing field: summary")
 	}
 
-	if a.Description == "" {
-		errs = append(errs, "invalid ticket: missing field: description")
+	if a.Status == "" {
+		errs = append(errs, "invalid ticket: missing field: status")
 	}
 
 	if len(errs) > 0 {

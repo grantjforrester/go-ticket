@@ -154,7 +154,9 @@ components:
           type: string
         description:
           type: string
-      required: ["summary"]
+        status:
+          type: string
+      required: ["summary", "status"]
     TicketWithMetadata:
       allOf:
         - "#/components/schemas/Metadata"
