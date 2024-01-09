@@ -11,11 +11,6 @@ import (
 	"github.com/grantjforrester/go-ticket/pkg/ticket"
 )
 
-const (
-	defaultPage = uint64(1)
-	defaultSize = uint64(100)
-)
-
 type SQLTicketRepository struct {
 	connectionPool *sql.DB
 }
@@ -99,7 +94,6 @@ func (s SQLTicketRepository) Delete(tx repository.Tx, ticketID string) error {
 func (s SQLTicketRepository) Query(tx repository.Tx, query collection.QuerySpec) (collection.Page[ticket.TicketWithMetadata], error) {
 	ptx := tx.(*sql.Tx)
 	results := []ticket.TicketWithMetadata{}
-	applyDefaults(&query)
 
 	rows, err := ptx.Query(`SELECT id, version, summary, description, status 
 							FROM tickets
@@ -139,14 +133,4 @@ func (s SQLTicketRepository) StartTx(ctx context.Context, readOnly bool) (reposi
 		return nil, fmt.Errorf("start tx failed: %w", err)
 	}
 	return tx, nil
-}
-
-func applyDefaults(query *collection.QuerySpec) {
-	if query.Page == 0 {
-		query.Page = defaultPage
-	}
-
-	if query.Size == 0 {
-		query.Size = defaultSize
-	}
 }

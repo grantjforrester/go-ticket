@@ -11,7 +11,15 @@ import (
 	"github.com/grantjforrester/go-ticket/pkg/ticket"
 )
 
-var ticketQueries = map[string]collection.FieldCapability{
+var QueryDefaults = struct {
+	Page uint64
+	Size uint64
+}{
+	Page: uint64(1),
+	Size: uint64(100),
+}
+
+var ticketCapabilities = map[string]collection.FieldCapability{
 	"summary": {Filter: true, Sort: true},
 }
 
@@ -31,7 +39,8 @@ func (svc TicketService) QueryTickets(context context.Context, query collection.
 		return collection.Page[ticket.TicketWithMetadata]{}, err
 	}
 
-	if err := query.Validate(ticketQueries); err != nil {
+	applyDefaults(&query)
+	if err := query.Validate(ticketCapabilities); err != nil {
 		return collection.Page[ticket.TicketWithMetadata]{}, err
 	}
 
@@ -164,4 +173,14 @@ func (svc TicketService) DeleteAlert(context context.Context, ticketID string) e
 	}
 
 	return nil
+}
+
+func applyDefaults(query *collection.QuerySpec) {
+	if query.Page == 0 {
+		query.Page = QueryDefaults.Page
+	}
+
+	if query.Size == 0 {
+		query.Size = QueryDefaults.Size
+	}
 }
