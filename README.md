@@ -2,6 +2,20 @@
 
 Development exercise to explore language and library capabilities by building a simple ticketing application.
 
+Ideas explored:
+
+- Layered/clean architecture
+
+- REST API design
+
+- REST API query implementation
+
+- Common repository pattern
+
+- Error handling
+
+- Cloud ready deployment
+
 ## Running
 
 Set required environment variables:
