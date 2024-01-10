@@ -7,6 +7,7 @@ import (
 
 	"github.com/grantjforrester/go-ticket/internal/service"
 	"github.com/grantjforrester/go-ticket/pkg/collection"
+	sq "github.com/grantjforrester/go-ticket/pkg/collection/sql"
 	"github.com/grantjforrester/go-ticket/pkg/repository"
 	"github.com/grantjforrester/go-ticket/pkg/ticket"
 )
@@ -95,13 +96,19 @@ func (s SQLTicketRepository) Query(tx repository.Tx, query repository.Query) (co
 	ptx := tx.(*sql.Tx)
 	qspec := query.(collection.QuerySpec)
 	results := []ticket.TicketWithMetadata{}
+	qry, args, err := sq.SQLQuery{
+		Fields: []string{"id", "version", "summary", "description", "status"},
+		Table:  "tickets",
+		Query:  qspec,
+	}.ToSQL()
+	if err != nil {
+		return collection.Page[ticket.TicketWithMetadata]{}, fmt.Errorf("query tickets failed (1): %w", err)
+	}
 
-	rows, err := ptx.Query(`SELECT id, version, summary, description, status 
-							FROM tickets
-							LIMIT $1 OFFSET $2`, query.Size, (query.Page-1)*query.Size)
+	rows, err := ptx.Query(qry, args...)
 	if err != nil {
 		return collection.Page[ticket.TicketWithMetadata]{},
-			fmt.Errorf("query tickets failed (1): %w", err)
+			fmt.Errorf("query tickets failed (2): %w", err)
 	}
 	defer rows.Close()
 
@@ -110,7 +117,7 @@ func (s SQLTicketRepository) Query(tx repository.Tx, query repository.Query) (co
 		err := rows.Scan(&t.ID, &t.Version, &t.Summary, &t.Description, &t.Status)
 		if err != nil {
 			return collection.Page[ticket.TicketWithMetadata]{},
-				fmt.Errorf("query tickets failed (2): %w", err)
+				fmt.Errorf("query tickets failed (3): %w", err)
 		}
 		results = append(results, t)
 	}
