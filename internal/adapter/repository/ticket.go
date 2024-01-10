@@ -91,8 +91,9 @@ func (s SQLTicketRepository) Delete(tx repository.Tx, ticketID string) error {
 	return nil
 }
 
-func (s SQLTicketRepository) Query(tx repository.Tx, query collection.QuerySpec) (collection.Page[ticket.TicketWithMetadata], error) {
+func (s SQLTicketRepository) Query(tx repository.Tx, query repository.Query) (collection.Page[ticket.TicketWithMetadata], error) {
 	ptx := tx.(*sql.Tx)
+	qspec := query.(collection.QuerySpec)
 	results := []ticket.TicketWithMetadata{}
 
 	rows, err := ptx.Query(`SELECT id, version, summary, description, status 
@@ -117,7 +118,7 @@ func (s SQLTicketRepository) Query(tx repository.Tx, query collection.QuerySpec)
 	size := uint64(len(results))
 	page := uint64(0)
 	if size > 0 {
-		page = query.Page
+		page = qspec.Page
 	}
 	return collection.Page[ticket.TicketWithMetadata]{
 		Results: results,
