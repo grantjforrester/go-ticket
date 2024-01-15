@@ -87,7 +87,7 @@ func (api *API) updateTicket(resp http.ResponseWriter, req *http.Request) {
 func (api *API) deleteTicket(resp http.ResponseWriter, req *http.Request) {
 	ticketID := path.Base(req.URL.Path)
 
-	err := api.services.Ticket.DeleteAlert(req.Context(), ticketID)
+	err := api.services.Ticket.DeleteTicket(req.Context(), ticketID)
 	if err != nil {
 		api.mediaHandler.WriteError(resp, err)
 		return

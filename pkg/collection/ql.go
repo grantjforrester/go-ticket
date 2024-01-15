@@ -23,16 +23,16 @@ const (
 	OpLe        Operator  = "<="
 )
 
-var FieldPattern = `\w+`
-var ValuePattern = `.+`
-var OperatorPattern = fmt.Sprintf("%s|%s|%s|%s|%s|%s", OpEq, OpNe, OpGt, OpLt, OpGe, OpLe)
-var FilterPattern = fmt.Sprintf("(%s)(%s)(%s)", FieldPattern, OperatorPattern, ValuePattern)
-var SortPattern = fmt.Sprintf("(%s) (%s|%s)", FieldPattern, SortAsc, SortDesc)
+var fieldPattern = `\w+`
+var valuePattern = `.+`
+var operatorPattern = fmt.Sprintf("%s|%s|%s|%s|%s|%s", OpEq, OpNe, OpGt, OpLt, OpGe, OpLe)
+var filterPattern = fmt.Sprintf("(%s)(%s)(%s)", fieldPattern, operatorPattern, valuePattern)
+var sortPattern = fmt.Sprintf("(%s) (%s|%s)", fieldPattern, SortAsc, SortDesc)
 
 func ParseQuery(urlQuery url.Values) (QuerySpec, error) {
 	var (
-		frx = regexp.MustCompile(FilterPattern)
-		srx = regexp.MustCompile(SortPattern)
+		frx = regexp.MustCompile(filterPattern)
+		srx = regexp.MustCompile(sortPattern)
 	)
 
 	q := QuerySpec{}

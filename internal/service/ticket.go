@@ -9,6 +9,8 @@ import (
 	"github.com/grantjforrester/go-ticket/pkg/collection"
 	"github.com/grantjforrester/go-ticket/pkg/repository"
 	"github.com/grantjforrester/go-ticket/pkg/ticket"
+
+	"github.com/google/uuid"
 )
 
 var QueryDefaults = struct {
@@ -46,7 +48,7 @@ func (svc TicketService) QueryTickets(context context.Context, query collection.
 
 	tx, err := svc.repository.StartTx(context, true)
 	if err != nil {
-		return collection.Page[ticket.TicketWithMetadata]{}, fmt.Errorf("query tickets failed (1): %w", err)
+		return collection.Page[ticket.TicketWithMetadata]{}, fmt.Errorf("could not start tx: %w", err)
 	}
 	defer func() {
 		err = errors.Join(err, tx.Rollback())
@@ -54,12 +56,12 @@ func (svc TicketService) QueryTickets(context context.Context, query collection.
 
 	tickets, err := svc.repository.Query(tx, query)
 	if err != nil {
-		return collection.Page[ticket.TicketWithMetadata]{}, fmt.Errorf("query tickets failed (2): %w", err)
+		return collection.Page[ticket.TicketWithMetadata]{}, fmt.Errorf("query ticket from repository failed: %w", err)
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return collection.Page[ticket.TicketWithMetadata]{}, fmt.Errorf("query tickets failed (3): %w", err)
+		return collection.Page[ticket.TicketWithMetadata]{}, fmt.Errorf("cound not commit tx: %w", err)
 	}
 
 	return tickets, nil
@@ -70,9 +72,14 @@ func (svc TicketService) ReadTicket(context context.Context, ticketID string) (t
 		return ticket.TicketWithMetadata{}, err
 	}
 
+	_, err := uuid.Parse(ticketID)
+	if err != nil {
+		return ticket.TicketWithMetadata{}, RequestError{Message: fmt.Sprintf("invalid ticket id: %s", ticketID)}
+	}
+
 	tx, err := svc.repository.StartTx(context, true)
 	if err != nil {
-		return ticket.TicketWithMetadata{}, fmt.Errorf("read ticket failed (1): %w", err)
+		return ticket.TicketWithMetadata{}, fmt.Errorf("could not start tx: %w", err)
 	}
 	defer func() {
 		err = errors.Join(err, tx.Rollback())
@@ -80,12 +87,12 @@ func (svc TicketService) ReadTicket(context context.Context, ticketID string) (t
 
 	t, err := svc.repository.Read(tx, ticketID)
 	if err != nil {
-		return ticket.TicketWithMetadata{}, fmt.Errorf("read ticket failed (2): %w", err)
+		return ticket.TicketWithMetadata{}, fmt.Errorf("read ticket from repository failed: %w", err)
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return ticket.TicketWithMetadata{}, fmt.Errorf("read ticket failed (3): %w", err)
+		return ticket.TicketWithMetadata{}, fmt.Errorf("cound not commit tx: %w", err)
 	}
 
 	return t, nil
@@ -102,7 +109,7 @@ func (svc TicketService) CreateTicket(context context.Context, t ticket.TicketWi
 
 	tx, err := svc.repository.StartTx(context, false)
 	if err != nil {
-		return ticket.TicketWithMetadata{}, fmt.Errorf("create ticket failed (1): %w", err)
+		return ticket.TicketWithMetadata{}, fmt.Errorf("could not start tx: %w", err)
 	}
 	defer func() {
 		err = errors.Join(err, tx.Rollback())
@@ -110,12 +117,12 @@ func (svc TicketService) CreateTicket(context context.Context, t ticket.TicketWi
 
 	newTicket, err := svc.repository.Create(tx, t)
 	if err != nil {
-		return ticket.TicketWithMetadata{}, fmt.Errorf("create ticket failed (2): %w", err)
+		return ticket.TicketWithMetadata{}, fmt.Errorf("create ticket in repository failed: %w", err)
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return ticket.TicketWithMetadata{}, fmt.Errorf("create ticket failed (3): %w", err)
+		return ticket.TicketWithMetadata{}, fmt.Errorf("cound not commit tx: %w", err)
 	}
 
 	return newTicket, nil
@@ -126,13 +133,18 @@ func (svc TicketService) UpdateTicket(context context.Context, t ticket.TicketWi
 		return ticket.TicketWithMetadata{}, err
 	}
 
+	_, err := uuid.Parse(t.Metadata.ID)
+	if err != nil {
+		return ticket.TicketWithMetadata{}, RequestError{Message: fmt.Sprintf("invalid ticket id: %s", t.Metadata.ID)}
+	}
+
 	if err := t.Validate(); err != nil {
-		return ticket.TicketWithMetadata{}, &RequestError{Message: err.Error()}
+		return ticket.TicketWithMetadata{}, RequestError{Message: err.Error()}
 	}
 
 	tx, err := svc.repository.StartTx(context, false)
 	if err != nil {
-		return ticket.TicketWithMetadata{}, fmt.Errorf("update ticket failed (1): %w", err)
+		return ticket.TicketWithMetadata{}, fmt.Errorf("could not start tx: %w", err)
 	}
 	defer func() {
 		err = errors.Join(err, tx.Rollback())
@@ -140,24 +152,29 @@ func (svc TicketService) UpdateTicket(context context.Context, t ticket.TicketWi
 
 	updatedTicket, err := svc.repository.Update(tx, t)
 	if err != nil {
-		return ticket.TicketWithMetadata{}, fmt.Errorf("update ticket failed (2): %w", err)
+		return ticket.TicketWithMetadata{}, fmt.Errorf("update ticket in repository failed: %w", err)
 	}
 	err = tx.Commit()
 	if err != nil {
-		return ticket.TicketWithMetadata{}, fmt.Errorf("update ticket failed (3): %w", err)
+		return ticket.TicketWithMetadata{}, fmt.Errorf("cound not commit tx: %w", err)
 	}
 
 	return updatedTicket, nil
 }
 
-func (svc TicketService) DeleteAlert(context context.Context, ticketID string) error {
+func (svc TicketService) DeleteTicket(context context.Context, ticketID string) error {
 	if err := svc.authorizer.IsAuthorized(context, "DeleteTicket"); err != nil {
 		return err
 	}
 
+	_, err := uuid.Parse(ticketID)
+	if err != nil {
+		return RequestError{Message: fmt.Sprintf("invalid ticket id: %s", ticketID)}
+	}
+
 	tx, err := svc.repository.StartTx(context, false)
 	if err != nil {
-		return fmt.Errorf("delete ticket failed (1): %w", err)
+		return fmt.Errorf("could not start tx: %w", err)
 	}
 	defer func() {
 		err = errors.Join(err, tx.Rollback())
@@ -165,11 +182,11 @@ func (svc TicketService) DeleteAlert(context context.Context, ticketID string) e
 
 	err = svc.repository.Delete(tx, ticketID)
 	if err != nil {
-		return fmt.Errorf("delete ticket failed (2): %w", err)
+		return fmt.Errorf("delete ticket from repository: %w", err)
 	}
 	err = tx.Commit()
 	if err != nil {
-		return fmt.Errorf("delete ticket failed (3): %w", err)
+		return fmt.Errorf("cound not commit tx: %w", err)
 	}
 
 	return nil

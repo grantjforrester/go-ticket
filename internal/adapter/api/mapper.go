@@ -1,29 +1,29 @@
 package api
 
 import (
-	"github.com/grantjforrester/go-ticket/pkg/media"
-
+	"github.com/grantjforrester/go-ticket/internal/adapter/repository"
 	"github.com/grantjforrester/go-ticket/internal/service"
+	"github.com/grantjforrester/go-ticket/pkg/media/errors"
 )
 
-func NewErrorMapper() media.ErrorMapper {
-	errorMapper := media.NewRFC7807ErrorMapper("induction:go:err:", media.RFC7807ErrorMapping{
+func NewErrorMapper() errors.ErrorMapper {
+	errorMapper := errors.NewRFC7807Mapper("induction:go:err:", errors.RFC7807Mapping{
 		Status: 500,
 		Title:  "Internal Server Error",
 	})
-	errorMapper.RegisterError((*PathNotFoundError)(nil), media.RFC7807ErrorMapping{
+	errorMapper.RegisterError((*PathNotFoundError)(nil), errors.RFC7807Mapping{
 		Status: 404,
 		Title:  "Not Found",
 	})
-	errorMapper.RegisterError((*service.RequestError)(nil), media.RFC7807ErrorMapping{
+	errorMapper.RegisterError((*service.RequestError)(nil), errors.RFC7807Mapping{
 		Status: 400,
 		Title:  "Bad Request",
 	})
-	errorMapper.RegisterError((*service.NotFoundError)(nil), media.RFC7807ErrorMapping{
+	errorMapper.RegisterError((*repository.NotFoundError)(nil), errors.RFC7807Mapping{
 		Status: 404,
 		Title:  "Not Found",
 	})
-	errorMapper.RegisterError((*service.ConflictError)(nil), media.RFC7807ErrorMapping{
+	errorMapper.RegisterError((*repository.ConflictError)(nil), errors.RFC7807Mapping{
 		Status: 409,
 		Title:  "Conflict",
 	})

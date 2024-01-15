@@ -1,16 +1,26 @@
 package ticket
 
 import (
-	"errors"
 	"strings"
 )
 
+// TicketError is returned when validation fails.
+type TicketError struct {
+	Message string
+}
+
+func (ve TicketError) Error() string {
+	return ve.Message
+}
+
+// A Ticket represents a ticket (a reminder of work to be done) in a typical ITSM.
 type Ticket struct {
 	Summary     string `json:"summary"`
 	Description string `json:"description"`
 	Status      string `json:"status"`
 }
 
+// Validates the ticket properties. Returns ValidationError if validation fails.
 func (a Ticket) Validate() error {
 	errs := []string{}
 
@@ -23,12 +33,13 @@ func (a Ticket) Validate() error {
 	}
 
 	if len(errs) > 0 {
-		return errors.New(strings.Join(errs, ","))
+		return TicketError{Message: strings.Join(errs, ",")}
 	}
 
 	return nil
 }
 
+// A TicketWithMetadata merges the types Ticket and Metadata.
 type TicketWithMetadata struct {
 	Metadata
 	Ticket

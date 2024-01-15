@@ -6,10 +6,12 @@ import (
 	"io"
 	"log"
 	"net/http"
+
+	"github.com/grantjforrester/go-ticket/pkg/media/errors"
 )
 
 type JSONHandler struct {
-	ErrorMap ErrorMapper
+	ErrorMap errors.ErrorMapper
 }
 
 var _ Handler = (*JSONHandler)(nil)
