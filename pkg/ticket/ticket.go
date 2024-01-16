@@ -4,15 +4,6 @@ import (
 	"strings"
 )
 
-// TicketError is returned when validation fails.
-type TicketError struct {
-	Message string
-}
-
-func (ve TicketError) Error() string {
-	return ve.Message
-}
-
 // A Ticket represents a ticket (a reminder of work to be done) in a typical ITSM.
 type Ticket struct {
 	Summary     string `json:"summary"`

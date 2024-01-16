@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/grantjforrester/go-ticket/internal/adapter/repository"
 	"github.com/grantjforrester/go-ticket/internal/service"
+	"github.com/grantjforrester/go-ticket/pkg/collection"
 	"github.com/grantjforrester/go-ticket/pkg/media/errors"
 )
 
@@ -16,6 +17,10 @@ func NewErrorMapper() errors.ErrorMapper {
 		Title:  "Not Found",
 	})
 	errorMapper.RegisterError((*service.RequestError)(nil), errors.RFC7807Mapping{
+		Status: 400,
+		Title:  "Bad Request",
+	})
+	errorMapper.RegisterError((*collection.QueryError)(nil), errors.RFC7807Mapping{
 		Status: 400,
 		Title:  "Bad Request",
 	})

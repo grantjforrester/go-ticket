@@ -41,13 +41,13 @@ type FieldCapability struct {
 func (q QuerySpec) Validate(fieldCapabilities map[string]FieldCapability) error {
 	for _, field := range q.Filters {
 		if f, ok := fieldCapabilities[field.Field]; !ok || !f.Filter {
-			return fmt.Errorf("invalid filter: %s", field.Field)
+			return QueryError{Message: fmt.Sprintf("invalid filter field: %s", field.Field)}
 		}
 	}
 
 	for _, field := range q.Sorts {
 		if f, ok := fieldCapabilities[field.Field]; !ok || !f.Sort {
-			return fmt.Errorf("invalid sort: %s", field.Field)
+			return QueryError{Message: fmt.Sprintf("invalid sort field: %s", field.Field)}
 		}
 	}
 

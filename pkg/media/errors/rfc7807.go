@@ -69,6 +69,7 @@ func (m *RFC7807Mapper) RegisterError(err error, mapping RFC7807Mapping) {
 }
 
 // matchError compares type of error (and any wrapped errors) with mappings.
+// Returns mapping and actual (possibly unwrapped) error matched of false if no match found.
 func (m *RFC7807Mapper) matchError(err error) (RFC7807Mapping, error, bool) {
 	for e := err; e != nil; {
 		errorType := reflect.TypeOf(e).Name()
