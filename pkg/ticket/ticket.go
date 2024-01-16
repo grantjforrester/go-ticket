@@ -1,6 +1,7 @@
 package ticket
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -11,20 +12,20 @@ type Ticket struct {
 	Status      string `json:"status"`
 }
 
-// Validates the ticket properties. Returns ValidationError if validation fails.
-func (a Ticket) Validate() error {
+// Validates the ticket properties. Returns error if validation fails.
+func (t Ticket) Validate() error {
 	errs := []string{}
 
-	if a.Summary == "" {
-		errs = append(errs, "invalid ticket: missing field: summary")
+	if t.Summary == "" {
+		errs = append(errs, "missing field: summary")
 	}
 
-	if a.Status == "" {
-		errs = append(errs, "invalid ticket: missing field: status")
+	if t.Status == "" {
+		errs = append(errs, "missing field: status")
 	}
 
 	if len(errs) > 0 {
-		return TicketError{Message: strings.Join(errs, ",")}
+		return fmt.Errorf(strings.Join(errs, ","))
 	}
 
 	return nil
@@ -34,4 +35,23 @@ func (a Ticket) Validate() error {
 type TicketWithMetadata struct {
 	Metadata
 	Ticket
+}
+
+// Validates the ticket with metadata properties. Returns error if validation fails.
+func (t TicketWithMetadata) Validate() error {
+	errs := []string{}
+
+	if err := t.Metadata.Validate(); err != nil {
+		errs = append(errs, err.Error())
+	}
+
+	if err := t.Ticket.Validate(); err != nil {
+		errs = append(errs, err.Error())
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf(strings.Join(errs, ","))
+	}
+
+	return nil
 }

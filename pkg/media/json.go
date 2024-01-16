@@ -22,7 +22,15 @@ func (j JSONHandler) ReadResource(req *http.Request, resource any) error {
 		return fmt.Errorf("failed to read resource: %w", err)
 	}
 
-	return json.Unmarshal(jsonBytes, resource)
+	err = json.Unmarshal(jsonBytes, resource)
+	switch e := err.(type) {
+	case *json.SyntaxError:
+		return MediaError{Message: "invalid json"}
+	case *json.UnmarshalTypeError:
+		return MediaError{Message: fmt.Sprintf("invalid type for field: %s", e.Field)}
+	}
+
+	return nil
 }
 
 func (j JSONHandler) WriteResponse(resp http.ResponseWriter, status int, resource any) {

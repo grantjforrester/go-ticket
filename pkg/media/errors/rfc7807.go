@@ -41,8 +41,8 @@ func NewRFC7807Mapper(uriPrefix string, defaultError RFC7807Mapping) RFC7807Mapp
 	}
 }
 
-// MapError is an implementation of ErrorMapper.MapError().  Given a POINTER to a Go Error,
-// am appropriate status code and RFC7807Error according to registered mappings. See RegisterError.
+// MapError is an implementation of ErrorMapper.MapError().  Given a Go Error, an appropriate
+// status code and RFC7807Error according to registered mappings. See RegisterError.
 //
 // Matching is performed by comparing the TypeOf the error against the TypeOf the errors in
 // registered mappings. If not matched the error is unwrapped using Unwrap and wrapped errors compared.

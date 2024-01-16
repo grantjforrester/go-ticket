@@ -103,8 +103,8 @@ func (svc TicketService) CreateTicket(context context.Context, t ticket.TicketWi
 		return ticket.TicketWithMetadata{}, err
 	}
 
-	if err := t.Validate(); err != nil {
-		return ticket.TicketWithMetadata{}, &RequestError{Message: err.Error()}
+	if err := t.Ticket.Validate(); err != nil {
+		return ticket.TicketWithMetadata{}, RequestError{Message: err.Error()}
 	}
 
 	tx, err := svc.repository.StartTx(context, false)
