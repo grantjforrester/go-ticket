@@ -2,6 +2,7 @@ package collection
 
 import (
 	"fmt"
+	"golang.org/x/exp/slices"
 )
 
 type QuerySpec struct {
@@ -33,21 +34,25 @@ type Page[T any] struct {
 }
 
 type FieldCapability struct {
-	Filter bool
-	Sort   bool
+	Filter    bool
+	FilterOps []Operator
+	Sort      bool
 }
 
 // Validates the query against a set of field capabilities.
 func (q QuerySpec) Validate(fieldCapabilities map[string]FieldCapability) error {
-	for _, field := range q.Filters {
-		if f, ok := fieldCapabilities[field.Field]; !ok || !f.Filter {
-			return QueryError{Message: fmt.Sprintf("invalid filter field: %s", field.Field)}
+	for _, filter := range q.Filters {
+		if f, ok := fieldCapabilities[filter.Field]; !ok || !f.Filter {
+			return QueryError{Message: fmt.Sprintf("invalid filter field: %s", filter.Field)}
+		}
+		if !slices.Contains(fieldCapabilities[filter.Field].FilterOps, filter.Operator) {
+			return QueryError{Message: fmt.Sprintf("invalid filter operator: %s", filter.Operator)}
 		}
 	}
 
-	for _, field := range q.Sorts {
-		if f, ok := fieldCapabilities[field.Field]; !ok || !f.Sort {
-			return QueryError{Message: fmt.Sprintf("invalid sort field: %s", field.Field)}
+	for _, sort := range q.Sorts {
+		if f, ok := fieldCapabilities[sort.Field]; !ok || !f.Sort {
+			return QueryError{Message: fmt.Sprintf("invalid sort field: %s", sort.Field)}
 		}
 	}
 

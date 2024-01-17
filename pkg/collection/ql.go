@@ -23,6 +23,10 @@ const (
 	OpLe        Operator  = "<="
 )
 
+var StringOps = []Operator{OpEq, OpNe}
+var BoolOps = StringOps
+var NumberOps = []Operator{OpEq, OpNe, OpGt, OpLt, OpGe, OpLe}
+
 var fieldPattern = `\w+`
 var valuePattern = `.+`
 var operatorPattern = fmt.Sprintf("%s|%s|%s|%s|%s|%s", OpEq, OpNe, OpGt, OpLt, OpGe, OpLe)

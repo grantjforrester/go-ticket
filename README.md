@@ -2,6 +2,8 @@
 
 Development exercise to explore language and library capabilities by building a simple ticketing application.
 
+Requires Go version 1.20.
+
 Ideas explored:
 
 - Layered/clean architecture

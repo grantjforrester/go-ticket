@@ -22,7 +22,7 @@ var QueryDefaults = struct {
 }
 
 var ticketCapabilities = map[string]collection.FieldCapability{
-	"summary": {Filter: true, Sort: true},
+	"summary": {Filter: true, FilterOps: collection.StringOps, Sort: true},
 }
 
 type TicketService struct {
