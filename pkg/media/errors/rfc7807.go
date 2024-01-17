@@ -20,7 +20,7 @@ type RFC7807Error struct {
 type RFC7807Mapper struct {
 	uriPrefix    string
 	defaultError RFC7807Mapping
-	errorMap     map[string]RFC7807Mapping
+	errorMap     map[reflect.Type]RFC7807Mapping
 }
 
 var _ ErrorMapper = (*RFC7807Mapper)(nil)
@@ -33,7 +33,7 @@ type RFC7807Mapping struct {
 
 // NewRFC7807Mapper creates a new RFC7807ErrorMapper.
 func NewRFC7807Mapper(uriPrefix string, defaultError RFC7807Mapping) RFC7807Mapper {
-	errorMap := make(map[string]RFC7807Mapping)
+	errorMap := make(map[reflect.Type]RFC7807Mapping)
 	return RFC7807Mapper{
 		uriPrefix:    uriPrefix,
 		defaultError: defaultError,
@@ -64,7 +64,7 @@ func (m *RFC7807Mapper) MapError(err error) (int, any) {
 // RegisterError allows a rule to be added to mapper that describes how a matching Go error
 // should be handled.
 func (m *RFC7807Mapper) RegisterError(err error, mapping RFC7807Mapping) {
-	errorType := reflect.TypeOf(err).Elem().Name()
+	errorType := reflect.TypeOf(err).Elem()
 	m.errorMap[errorType] = mapping
 }
 
@@ -72,7 +72,7 @@ func (m *RFC7807Mapper) RegisterError(err error, mapping RFC7807Mapping) {
 // Returns mapping and actual (possibly unwrapped) error matched of false if no match found.
 func (m *RFC7807Mapper) matchError(err error) (RFC7807Mapping, error, bool) {
 	for e := err; e != nil; {
-		errorType := reflect.TypeOf(e).Name()
+		errorType := reflect.TypeOf(e)
 		errorMapping, ok := m.errorMap[errorType]
 		if ok {
 			return errorMapping, e, ok
