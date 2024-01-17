@@ -14,12 +14,7 @@ type Metadata struct {
 	Version string `json:"version"`
 }
 
-// Creates a new Metadata.
-func NewMetadata(id string, version string) Metadata {
-	return Metadata{ID: id, Version: version}
-}
-
-// Validates metadata properties. Returns error if validation fails.
+// Validate checks  metadata properties. Returns error if validation fails.
 func (m Metadata) Validate() error {
 	errs := []string{}
 

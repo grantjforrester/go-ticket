@@ -7,14 +7,6 @@ import (
 	"strings"
 )
 
-// RFC7807Error represents an error in JSON RFC7807 format.
-type RFC7807Error struct {
-	TypeURI string `json:"type"`
-	Title   string `json:"title"`
-	Status  int    `json:"status"`
-	Detail  string `json:"detail"`
-}
-
 // RFC7807Mapper is an implementation of ErrorMapper that, given a Go Error,
 // reformats to a status code and RFC7807Error.
 type RFC7807Mapper struct {
@@ -24,6 +16,14 @@ type RFC7807Mapper struct {
 }
 
 var _ ErrorMapper = (*RFC7807Mapper)(nil)
+
+// RFC7807Error represents an error in JSON RFC7807 format.
+type RFC7807Error struct {
+	TypeURI string `json:"type"`
+	Title   string `json:"title"`
+	Status  int    `json:"status"`
+	Detail  string `json:"detail"`
+}
 
 // RFC7807Mapping describes the details of an RFC7807 error to be returned.
 type RFC7807Mapping struct {

@@ -4,18 +4,19 @@ import (
 	"net/http"
 )
 
-// Handler describes a common pattern for reading and writing resources from http requests and responses.
+// Handler describes a common pattern for reading and writing resources from HTTP requests and responses.
 type Handler interface {
 
-	// Read a resource from a request into the pointer resource.
-	// Expected resource format determined by handler implementation.
+	// Read a resource from a request into the given struct.
+	// The expected resource format is determined by the handler implementation.
+	// If the expected resource cannot be parsed correctly a MediaError is returned.
 	ReadResource(r *http.Request, resource any) error
 
-	// Write a resource to the response with the given status code.
-	// Resource format determined by handler implementation.
+	// Writes the given resource to the response writer with the given status code.
+	// The resource format is determined by the handler implementation.
 	WriteResponse(w http.ResponseWriter, statusCode int, resource any)
 
-	// Write an error to the response.
-	// Status code and error format determined by handler implementation.
+	// Writes the given error to the response.
+	// Status code and error format is determined by the handler implementation.
 	WriteError(w http.ResponseWriter, err error)
 }

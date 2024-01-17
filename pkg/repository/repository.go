@@ -6,7 +6,7 @@ import (
 	"github.com/grantjforrester/go-ticket/pkg/collection"
 )
 
-// Repository describes a common pattern for CRUD operations on persistent entities.
+// Repository describes a common pattern for CRUD operations on persistent stores.
 type Repository[T any] interface {
 
 	// Create creates a new entity in the repository using the given transaction.

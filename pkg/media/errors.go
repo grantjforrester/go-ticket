@@ -1,8 +1,6 @@
 package media
 
-/*
- * Returned when unexpexted media input received.
- */
+// MediaError is returned when a received resource could not be correctly parsed.
 type MediaError struct {
 	Message string
 }
