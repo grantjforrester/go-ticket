@@ -4,15 +4,13 @@ import (
 	"errors"
 	"log"
 	"reflect"
-	"strings"
 )
 
 // RFC7807Mapper is an implementation of ErrorMapper that, given a Go Error,
-// reformats to a status code and RFC7807Error.
+// returns an HTTP status code and RFC7807Error.
 type RFC7807Mapper struct {
-	uriPrefix    string
-	defaultError RFC7807Mapping
-	errorMap     map[reflect.Type]RFC7807Mapping
+	defaultError RFC7807Error
+	errorMap     map[reflect.Type]RFC7807Error
 }
 
 var _ ErrorMapper = (*RFC7807Mapper)(nil)
@@ -25,35 +23,30 @@ type RFC7807Error struct {
 	Detail  string `json:"detail"`
 }
 
-// RFC7807Mapping describes the details of an RFC7807 error to be returned.
-type RFC7807Mapping struct {
-	Status int
-	Title  string
-}
-
-// NewRFC7807Mapper creates a new RFC7807ErrorMapper.
-func NewRFC7807Mapper(uriPrefix string, defaultError RFC7807Mapping) RFC7807Mapper {
-	errorMap := make(map[reflect.Type]RFC7807Mapping)
+// NewRFC7807ErrorMapper creates a new RFC7807ErrorMapper that returns the given
+// default error if no error was matched.
+func NewRFC7807ErrorMapper(defaultError RFC7807Error) RFC7807Mapper {
+	errorMap := make(map[reflect.Type]RFC7807Error)
 	return RFC7807Mapper{
-		uriPrefix:    uriPrefix,
 		defaultError: defaultError,
 		errorMap:     errorMap,
 	}
 }
 
 // MapError is an implementation of ErrorMapper.MapError().  Given a Go Error, an appropriate
-// status code and RFC7807Error according to registered mappings. See RegisterError.
+// HTTP status code and RFC7807Error are returned according to registered mapping rules.
+// See RegisterError.
 //
 // Matching is performed by comparing the TypeOf the error against the TypeOf the errors in
 // registered mappings. If not matched the error is unwrapped using Unwrap and wrapped errors compared.
 //
-// If the error is not matched to any registered mapping then the defaultError and its status is
-// returned and with the Detail field deliberately left blank.
-// Unmatched errors will be logged using err.error().
+// If the error is not matched to any registered mapping rule then the defaultError and its status is
+// returned.
+// Unmatched errors will always also be logged using err.error().
 func (m *RFC7807Mapper) MapError(err error) (int, any) {
-	if errorMapping, matchedError, ok := m.matchError(err); ok {
+	if match, unwrappedErr, ok := m.matchError(err); ok {
 		// return specific error
-		return errorMapping.Status, m.formatError(matchedError, errorMapping)
+		return match.Status, m.formatError(unwrappedErr, match)
 	} else {
 		// return default error
 		log.Println("Error: ", err.Error())
@@ -63,36 +56,35 @@ func (m *RFC7807Mapper) MapError(err error) (int, any) {
 
 // RegisterError allows a rule to be added to mapper that describes how a matching Go error
 // should be handled.
-func (m *RFC7807Mapper) RegisterError(err error, mapping RFC7807Mapping) {
+func (m *RFC7807Mapper) RegisterError(err error, mapping RFC7807Error) {
 	errorType := reflect.TypeOf(err).Elem()
 	m.errorMap[errorType] = mapping
 }
 
 // matchError compares type of error (and any wrapped errors) with mappings.
 // Returns mapping and actual (possibly unwrapped) error matched of false if no match found.
-func (m *RFC7807Mapper) matchError(err error) (RFC7807Mapping, error, bool) {
+func (m *RFC7807Mapper) matchError(err error) (RFC7807Error, error, bool) {
 	for e := err; e != nil; {
 		errorType := reflect.TypeOf(e)
-		errorMapping, ok := m.errorMap[errorType]
+		match, ok := m.errorMap[errorType]
 		if ok {
-			return errorMapping, e, ok
+			return match, e, ok
 		}
 		e = errors.Unwrap(e)
 	}
-	return RFC7807Mapping{}, nil, false
+	return RFC7807Error{}, nil, false
 }
 
-// formatError formats a Go error into an RFC7807Error.
-func (m *RFC7807Mapper) formatError(err error, mapping RFC7807Mapping) RFC7807Error {
-	return RFC7807Error{
-		TypeURI: m.formatURI(mapping.Title),
-		Title:   mapping.Title,
-		Status:  mapping.Status,
-		Detail:  err.Error(),
+// formatError formats a Go error into an RFC7807Error according to a match.
+func (m *RFC7807Mapper) formatError(err error, match RFC7807Error) RFC7807Error {
+	detail := err.Error()
+	if match.Detail != "" {
+		detail = match.Detail
 	}
-}
-
-// format URI creates error URI from prefix + title with spaces removed.
-func (m *RFC7807Mapper) formatURI(title string) string {
-	return strings.ReplaceAll(strings.ToLower(m.uriPrefix+title), " ", "")
+	return RFC7807Error{
+		TypeURI: match.TypeURI,
+		Title:   match.Title,
+		Status:  match.Status,
+		Detail:  detail,
+	}
 }

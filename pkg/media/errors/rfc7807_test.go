@@ -25,8 +25,8 @@ func (r MockError2) Error() string {
 
 func TestShouldReturnDefaultError(t *testing.T) {
 	// given
-	defaultError := errors.RFC7807Mapping{Status: 500, Title: "Internal Server Error"}
-	errorMapper := errors.NewRFC7807Mapper("test:err:", defaultError)
+	defaultError := errors.RFC7807Error{TypeURI: "test:err:internalservererror", Status: 500, Title: "Internal Server Error"}
+	errorMapper := errors.NewRFC7807ErrorMapper(defaultError)
 	mockErr := MockError1{}
 
 	// when
@@ -45,13 +45,13 @@ func TestShouldReturnDefaultError(t *testing.T) {
 
 func TestShouldMatchErrorAndReturnRfc7807Error(t *testing.T) {
 	// given
-	defaultError := errors.RFC7807Mapping{Status: 500, Title: "Internal Server Error"}
-	errorMapper := errors.NewRFC7807Mapper("test:err:", defaultError)
+	defaultError := errors.RFC7807Error{TypeURI: "test:err:internalservererror", Status: 500, Title: "Internal Server Error"}
+	errorMapper := errors.NewRFC7807ErrorMapper(defaultError)
 	mockErr := MockError1{}
 
 	// when
-	errorMapper.RegisterError((*MockError1)(nil), errors.RFC7807Mapping{Status: 404, Title: "Not Found"})
-	errorMapper.RegisterError((*MockError2)(nil), errors.RFC7807Mapping{Status: 400, Title: "Bad Request"})
+	errorMapper.RegisterError((*MockError1)(nil), errors.RFC7807Error{TypeURI: "test:err:notfound", Status: 404, Title: "Not Found"})
+	errorMapper.RegisterError((*MockError2)(nil), errors.RFC7807Error{TypeURI: "test:err:badrequest", Status: 400, Title: "Bad Request"})
 	statusCode, errorResponse := errorMapper.MapError(mockErr)
 
 	// then
@@ -67,12 +67,12 @@ func TestShouldMatchErrorAndReturnRfc7807Error(t *testing.T) {
 
 func TestShouldReturnDefaultErrorIfNoMatch(t *testing.T) {
 	// given
-	defaultError := errors.RFC7807Mapping{Status: 500, Title: "Internal Server Error"}
-	errorMapper := errors.NewRFC7807Mapper("test:err:", defaultError)
+	defaultError := errors.RFC7807Error{TypeURI: "test:err:internalservererror", Status: 500, Title: "Internal Server Error"}
+	errorMapper := errors.NewRFC7807ErrorMapper(defaultError)
 	mockErr := MockError2{}
 
 	// when
-	errorMapper.RegisterError((*MockError1)(nil), errors.RFC7807Mapping{Status: 404, Title: "Not Found"})
+	errorMapper.RegisterError((*MockError1)(nil), errors.RFC7807Error{TypeURI: "test:err:notfound", Status: 404, Title: "Not Found"})
 	statusCode, errorResponse := errorMapper.MapError(mockErr)
 
 	// then
@@ -88,12 +88,12 @@ func TestShouldReturnDefaultErrorIfNoMatch(t *testing.T) {
 
 func TestShouldMatchWrappedError(t *testing.T) {
 	// given
-	defaultError := errors.RFC7807Mapping{Status: 500, Title: "Internal Server Error"}
-	errorMapper := errors.NewRFC7807Mapper("test:err:", defaultError)
+	defaultError := errors.RFC7807Error{TypeURI: "test:err:internalservererror", Status: 500, Title: "Internal Server Error"}
+	errorMapper := errors.NewRFC7807ErrorMapper(defaultError)
 	mockErr := fmt.Errorf("wrapper: %w", MockError1{})
 
 	// when
-	errorMapper.RegisterError((*MockError1)(nil), errors.RFC7807Mapping{Status: 404, Title: "Not Found"})
+	errorMapper.RegisterError((*MockError1)(nil), errors.RFC7807Error{TypeURI: "test:err:notfound", Status: 404, Title: "Not Found"})
 	statusCode, errorResponse := errorMapper.MapError(mockErr)
 
 	// then

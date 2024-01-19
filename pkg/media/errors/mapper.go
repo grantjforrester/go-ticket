@@ -4,6 +4,6 @@ package errors
 // for output to user.
 type ErrorMapper interface {
 
-	// MapError takes an Go error and returns a status code and an error object for output.
+	// MapError takes an Go error and returns an error code and an error object for output.
 	MapError(err error) (int, any)
 }
