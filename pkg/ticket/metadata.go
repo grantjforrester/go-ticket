@@ -7,14 +7,14 @@ import (
 
 // Metadata holds information common to all domain entities.
 type Metadata struct {
-	// A unique identifier for the domain entity.
+	// ID is a unique identifier for a domain entity.
 	ID string `json:"id"`
 
-	// A version identifier that changes as the domain entity's properties change.
+	// Version is an identifier that changes as the domain entity's properties change.
 	Version string `json:"version"`
 }
 
-// Validate checks  metadata properties. Returns error if validation fails.
+// Validate checks metadata properties are valid. Returns error if validation fails.
 func (m Metadata) Validate() error {
 	errs := []string{}
 

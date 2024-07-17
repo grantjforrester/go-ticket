@@ -1,7 +1,7 @@
 package authz
 
 /*
- * Authorization failed.
+ * AuthorizationError is returned when authorization of an operation failed.
  */
 type AuthorizationError struct {
 	Message string

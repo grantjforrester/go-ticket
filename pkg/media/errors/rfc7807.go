@@ -24,7 +24,7 @@ type RFC7807Error struct {
 }
 
 // NewRFC7807ErrorMapper creates a new RFC7807ErrorMapper that returns the given
-// default error if no error was matched.
+// default error if no matching error was found.
 func NewRFC7807ErrorMapper(defaultError RFC7807Error) RFC7807Mapper {
 	errorMap := make(map[reflect.Type]RFC7807Error)
 	return RFC7807Mapper{
@@ -33,8 +33,8 @@ func NewRFC7807ErrorMapper(defaultError RFC7807Error) RFC7807Mapper {
 	}
 }
 
-// MapError is an implementation of ErrorMapper.MapError().  Given a Go Error, an appropriate
-// HTTP status code and RFC7807Error are returned according to registered mapping rules.
+// MapError will, given a Go Error, return an appropriate
+// HTTP status code and RFC7807Error according to registered mapping rules.
 // See RegisterError.
 //
 // Matching is performed by comparing the TypeOf the error against the TypeOf the errors in
@@ -54,7 +54,7 @@ func (m *RFC7807Mapper) MapError(err error) (int, any) {
 	}
 }
 
-// RegisterError allows a rule to be added to mapper that describes how a matching Go error
+// RegisterError allows a rule to be added to his mapper that describes how a Go error
 // should be handled.
 func (m *RFC7807Mapper) RegisterError(err error, mapping RFC7807Error) {
 	errorType := reflect.TypeOf(err).Elem()
