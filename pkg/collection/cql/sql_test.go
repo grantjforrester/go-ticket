@@ -1,16 +1,16 @@
-package sql_test
+package cql_test
 
 import (
 	"testing"
 
 	"github.com/grantjforrester/go-ticket/pkg/collection"
-	"github.com/grantjforrester/go-ticket/pkg/collection/sql"
+	"github.com/grantjforrester/go-ticket/pkg/collection/cql"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestReturnOnlySelectFrom(t *testing.T) {
 	// Given
-	q := sql.SQLQuery{Fields: []string{"foo"}, Table: "bar"}
+	q := cql.SQLQuery{Fields: []string{"foo"}, Table: "bar"}
 
 	// When
 	sql, args, err := q.ToSQL()
@@ -23,13 +23,13 @@ func TestReturnOnlySelectFrom(t *testing.T) {
 
 func TestReturnWhereEquals(t *testing.T) {
 	// Given
-	q := sql.SQLQuery{
+	q := cql.SQLQuery{
 		Fields: []string{"foo"},
 		Table:  "bar",
 		Query: collection.QuerySpec{
-			Filters: []collection.FilterSpec{{
+			Filters: []collection.FilterExpr{{
 				Field:    "bam",
-				Operator: collection.OpEq,
+				Operator: cql.OpEq,
 				Value:    "baz",
 			}}}}
 
@@ -45,13 +45,13 @@ func TestReturnWhereEquals(t *testing.T) {
 
 func TestReturnWhereNotEquals(t *testing.T) {
 	// Given
-	q := sql.SQLQuery{
+	q := cql.SQLQuery{
 		Fields: []string{"foo"},
 		Table:  "bar",
 		Query: collection.QuerySpec{
-			Filters: []collection.FilterSpec{{
+			Filters: []collection.FilterExpr{{
 				Field:    "bam",
-				Operator: collection.OpNe,
+				Operator: cql.OpNe,
 				Value:    "baz",
 			}}}}
 
@@ -67,13 +67,13 @@ func TestReturnWhereNotEquals(t *testing.T) {
 
 func TestReturnOrderBy(t *testing.T) {
 	// Given
-	q := sql.SQLQuery{
+	q := cql.SQLQuery{
 		Table:  "bar",
 		Fields: []string{"foo"},
 		Query: collection.QuerySpec{
-			Sorts: []collection.SortSpec{{
+			Sorts: []collection.SortExpr{{
 				Field:     "bar",
-				Direction: collection.SortAsc,
+				Direction: cql.SortAsc,
 			}}}}
 
 	// When
@@ -87,7 +87,7 @@ func TestReturnOrderBy(t *testing.T) {
 
 func TestReturnLimit(t *testing.T) {
 	// Given
-	q := sql.SQLQuery{
+	q := cql.SQLQuery{
 		Table:  "bar",
 		Fields: []string{"foo"},
 		Query: collection.QuerySpec{
@@ -106,7 +106,7 @@ func TestReturnLimit(t *testing.T) {
 
 func TestReturnLimitAndOffset(t *testing.T) {
 	// Given
-	q := sql.SQLQuery{
+	q := cql.SQLQuery{
 		Table:  "bar",
 		Fields: []string{"foo"},
 		Query: collection.QuerySpec{
@@ -126,7 +126,7 @@ func TestReturnLimitAndOffset(t *testing.T) {
 
 func TestReturnAllWhenPageWithNoSize(t *testing.T) {
 	// Given
-	q := sql.SQLQuery{
+	q := cql.SQLQuery{
 		Table:  "bar",
 		Fields: []string{"foo"},
 		Query: collection.QuerySpec{

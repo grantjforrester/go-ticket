@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/grantjforrester/go-ticket/pkg/collection"
-	sq "github.com/grantjforrester/go-ticket/pkg/collection/sql"
+	"github.com/grantjforrester/go-ticket/pkg/collection/cql"
 	"github.com/grantjforrester/go-ticket/pkg/repository"
 	"github.com/grantjforrester/go-ticket/pkg/ticket"
 )
@@ -95,7 +95,7 @@ func (s SQLTicketRepository) Query(tx repository.Tx, query repository.Query) (co
 	ptx := tx.(*sql.Tx)
 	qspec := query.(collection.QuerySpec)
 	results := []ticket.TicketWithMetadata{}
-	qry, args, err := sq.SQLQuery{
+	qry, args, err := cql.SQLQuery{
 		Fields: []string{"id", "version", "summary", "description", "status"},
 		Table:  "tickets",
 		Query:  qspec,

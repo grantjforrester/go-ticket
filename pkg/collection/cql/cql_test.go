@@ -1,4 +1,4 @@
-package collection_test
+package cql_test
 
 import (
 	"net/url"
@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/grantjforrester/go-ticket/pkg/collection"
+	"github.com/grantjforrester/go-ticket/pkg/collection/cql"
 )
 
 func TestShouldReturnEmpty(t *testing.T) {
@@ -15,7 +15,7 @@ func TestShouldReturnEmpty(t *testing.T) {
 	query := MustParseQuery("")
 
 	// When
-	result, err := collection.ParseQuery(query)
+	result, err := cql.ParseQuery(query)
 
 	// Then
 	require.NoError(t, err)
@@ -30,13 +30,13 @@ func TestShouldReturnFilter(t *testing.T) {
 	query := MustParseQuery("filter=foo%3D%3Dbar")
 
 	// When
-	result, err := collection.ParseQuery(query)
+	result, err := cql.ParseQuery(query)
 
 	// Then
 	require.NoError(t, err)
 	assert.Len(t, result.Filters, 1)
 	assert.Equal(t, "foo", result.Filters[0].Field)
-	assert.Equal(t, collection.OpEq, result.Filters[0].Operator)
+	assert.Equal(t, cql.OpEq, result.Filters[0].Operator)
 	assert.Equal(t, "bar", result.Filters[0].Value)
 }
 
@@ -45,7 +45,7 @@ func TestShouldReturnErrorOnInvalidFilter(t *testing.T) {
 	query := MustParseQuery("filter=foo")
 
 	// When
-	_, err := collection.ParseQuery(query)
+	_, err := cql.ParseQuery(query)
 
 	// Then
 	assert.Error(t, err)
@@ -58,13 +58,13 @@ func TestShouldReturnSort(t *testing.T) {
 	query := MustParseQuery("sort=foo+asc")
 
 	// When
-	result, err := collection.ParseQuery(query)
+	result, err := cql.ParseQuery(query)
 
 	// Then
 	require.NoError(t, err)
 	assert.Len(t, result.Sorts, 1)
 	assert.Equal(t, "foo", result.Sorts[0].Field)
-	assert.Equal(t, collection.SortAsc, result.Sorts[0].Direction)
+	assert.Equal(t, cql.SortAsc, result.Sorts[0].Direction)
 }
 
 func TestShouldReturnErrorInInvalidSort(t *testing.T) {
@@ -72,7 +72,7 @@ func TestShouldReturnErrorInInvalidSort(t *testing.T) {
 	query := MustParseQuery("sort=foo")
 
 	// When
-	_, err := collection.ParseQuery(query)
+	_, err := cql.ParseQuery(query)
 
 	// Then
 	assert.Error(t, err)
@@ -85,7 +85,7 @@ func TestShouldReturnPageSpecWithIndexAndNoSize(t *testing.T) {
 	query := MustParseQuery("page=1")
 
 	// When
-	result, err := collection.ParseQuery(query)
+	result, err := cql.ParseQuery(query)
 
 	// Then
 	require.NoError(t, err)
@@ -98,7 +98,7 @@ func TestShouldReturnPageSpecWithIndexAndSize(t *testing.T) {
 	query := MustParseQuery("page=2&size=100")
 
 	// When
-	result, err := collection.ParseQuery(query)
+	result, err := cql.ParseQuery(query)
 
 	// Then
 	require.NoError(t, err)
@@ -111,7 +111,7 @@ func TestShouldReturnErrorOnZeroPageIndex(t *testing.T) {
 	query := MustParseQuery("page=0")
 
 	// When
-	_, err := collection.ParseQuery(query)
+	_, err := cql.ParseQuery(query)
 
 	// Then
 	assert.Error(t, err)
@@ -124,7 +124,7 @@ func TestShouldReturnErrorOnInvalidPageIndex(t *testing.T) {
 	query := MustParseQuery("page=foo")
 
 	// When
-	_, err := collection.ParseQuery(query)
+	_, err := cql.ParseQuery(query)
 
 	// Then
 	assert.Error(t, err)
@@ -137,7 +137,7 @@ func TestShouldReturnErrorOnZeroPageSize(t *testing.T) {
 	query := MustParseQuery("page=1&size=0")
 
 	// When
-	_, err := collection.ParseQuery(query)
+	_, err := cql.ParseQuery(query)
 
 	// Then
 	assert.Error(t, err)
@@ -150,7 +150,7 @@ func TestShouldReturnErrorOnInvalidPageSize(t *testing.T) {
 	query := MustParseQuery("page=1&size=foo")
 
 	// When
-	_, err := collection.ParseQuery(query)
+	_, err := cql.ParseQuery(query)
 
 	// Then
 	assert.Error(t, err)

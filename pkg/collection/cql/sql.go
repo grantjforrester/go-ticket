@@ -1,4 +1,4 @@
-package sql
+package cql
 
 import (
 	"fmt"
@@ -61,19 +61,19 @@ func (q SQLQuery) offset() uint64 {
 }
 
 // returns a given Squirrel expression for a filter
-func mapFilter(filter collection.FilterSpec) any {
+func mapFilter(filter collection.FilterExpr) any {
 	switch filter.Operator {
-	case collection.OpEq:
+	case OpEq:
 		return sq.Eq{filter.Field: filter.Value}
-	case collection.OpNe:
+	case OpNe:
 		return sq.NotEq{filter.Field: filter.Value}
-	case collection.OpLt:
+	case OpLt:
 		return sq.Lt{filter.Field: filter.Value}
-	case collection.OpLe:
+	case OpLe:
 		return sq.LtOrEq{filter.Field: filter.Value}
-	case collection.OpGt:
+	case OpGt:
 		return sq.Gt{filter.Field: filter.Value}
-	case collection.OpGe:
+	case OpGe:
 		return sq.GtOrEq{filter.Field: filter.Value}
 	default:
 		panic(fmt.Sprintf("unknown query filter operator: %s", filter.Operator))
@@ -83,9 +83,9 @@ func mapFilter(filter collection.FilterSpec) any {
 // returns a given Squirrel order by direction for a given direction
 func mapDirection(direction collection.Direction) string {
 	switch direction {
-	case collection.SortAsc:
+	case SortAsc:
 		return "ASC"
-	case collection.SortDesc:
+	case SortDesc:
 		return "DESC"
 	default:
 		panic(fmt.Sprintf("unknown query sort direction: %s", direction))

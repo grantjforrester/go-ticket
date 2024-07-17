@@ -7,6 +7,7 @@ import (
 
 	"github.com/grantjforrester/go-ticket/pkg/authz"
 	"github.com/grantjforrester/go-ticket/pkg/collection"
+	"github.com/grantjforrester/go-ticket/pkg/collection/cql"
 	"github.com/grantjforrester/go-ticket/pkg/repository"
 	"github.com/grantjforrester/go-ticket/pkg/ticket"
 
@@ -22,7 +23,7 @@ var QueryDefaults = struct {
 }
 
 var ticketCapabilities = map[string]collection.FieldCapability{
-	"summary": {Filter: true, FilterOps: collection.StringOps, Sort: true},
+	"summary": {Filter: true, FilterOps: cql.StringOps, Sort: true},
 }
 
 type TicketService struct {

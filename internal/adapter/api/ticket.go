@@ -7,7 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/grantjforrester/go-ticket/pkg/collection"
+	"github.com/grantjforrester/go-ticket/pkg/collection/cql"
 	"github.com/grantjforrester/go-ticket/pkg/ticket"
 )
 
@@ -21,7 +21,7 @@ func (api *API) registerTicketRoutes(router *mux.Router) {
 
 func (api *API) queryTickets(resp http.ResponseWriter, req *http.Request) {
 	urlQuery, _ := url.ParseQuery(req.URL.RawQuery)
-	querySpec, err := collection.ParseQuery(urlQuery)
+	querySpec, err := cql.ParseQuery(urlQuery)
 	if err != nil {
 		api.mediaHandler.WriteError(resp, err)
 		return
