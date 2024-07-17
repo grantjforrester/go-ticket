@@ -81,3 +81,11 @@ To run all the unit tests:
 ```
 go test ./...
 ```
+
+## Troubleshooting
+
+### Test that postgres is running and has the application database and tables.
+
+Open pgAdmin at `http://localhost:8900` (see [docker-compose.yml](./docker-compose.yml) for credentials). 
+
+Open the application database (see [.env](./.env) for password)
