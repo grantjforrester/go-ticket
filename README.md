@@ -41,6 +41,7 @@ docker-compose up
 Run the server only without Docker:
 
 ```
+export $(grep -v '^#' .env | xargs)
 go run ./cmd/server
 ```
 
