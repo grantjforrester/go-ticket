@@ -20,12 +20,6 @@ Ideas explored:
 
 ## Running
 
-Set required environment variables:
-
-```
-source .env
-```
-
 Run the server with all service dependencies using docker-compose:
 
 ```
