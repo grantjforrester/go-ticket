@@ -10,8 +10,6 @@ import (
 	"github.com/grantjforrester/go-ticket/pkg/collection/cql"
 	"github.com/grantjforrester/go-ticket/pkg/repository"
 	"github.com/grantjforrester/go-ticket/pkg/ticket"
-
-	"github.com/google/uuid"
 )
 
 var QueryDefaults = struct {
@@ -73,11 +71,6 @@ func (svc TicketService) ReadTicket(context context.Context, ticketID string) (t
 		return ticket.TicketWithMetadata{}, err
 	}
 
-	_, err := uuid.Parse(ticketID)
-	if err != nil {
-		return ticket.TicketWithMetadata{}, RequestError{Message: fmt.Sprintf("invalid ticket id: %s", ticketID)}
-	}
-
 	tx, err := svc.repository.StartTx(context, true)
 	if err != nil {
 		return ticket.TicketWithMetadata{}, fmt.Errorf("could not start tx: %w", err)
@@ -134,11 +127,6 @@ func (svc TicketService) UpdateTicket(context context.Context, t ticket.TicketWi
 		return ticket.TicketWithMetadata{}, err
 	}
 
-	_, err := uuid.Parse(t.Metadata.ID)
-	if err != nil {
-		return ticket.TicketWithMetadata{}, RequestError{Message: fmt.Sprintf("invalid ticket id: %s", t.Metadata.ID)}
-	}
-
 	if err := t.Validate(); err != nil {
 		return ticket.TicketWithMetadata{}, RequestError{Message: err.Error()}
 	}
@@ -166,11 +154,6 @@ func (svc TicketService) UpdateTicket(context context.Context, t ticket.TicketWi
 func (svc TicketService) DeleteTicket(context context.Context, ticketID string) error {
 	if err := svc.authorizer.IsAuthorized(context, "DeleteTicket"); err != nil {
 		return err
-	}
-
-	_, err := uuid.Parse(ticketID)
-	if err != nil {
-		return RequestError{Message: fmt.Sprintf("invalid ticket id: %s", ticketID)}
 	}
 
 	tx, err := svc.repository.StartTx(context, false)
